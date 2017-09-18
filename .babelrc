@@ -1,0 +1,16 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "node": "current"
+        },
+        "include": [
+          "transform-es2015-arrow-functions"
+        ]
+      }
+    ]
+  ],
+  "plugins": ["transform-class-properties"]
+}

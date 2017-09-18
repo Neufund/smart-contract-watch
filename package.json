@@ -1,9 +1,18 @@
 {
   "name": "smart-contract-watch",
   "version": "1.0.0",
-  "description": "Smart-Contract-Watch a service that watches smart contracts in the block chain and the transactions they conduct",
   "main": "index.js",
+  "description": "Smart-Contract-Watch a service that watches smart contracts in the block chain and the transactions they conduct",
   "repository": "https://github.com/Neufund/smart-contract-watch.git",
-  "author": "Moe <mohammed.alsharif@neufund.org>",
-  "license": "MIT"
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "build": "./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist",
+    "start": ""
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-env": "^1.6.0"
+  }
 }
