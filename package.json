@@ -2,6 +2,7 @@
   "name": "smart-contract-watch",
   "version": "1.0.0",
   "main": "index.js",
+  "description": "Smart-Contract-Watch a service that watches smart contracts in the block chain and the transactions they conduct",
   "repository": "https://github.com/Neufund/smart-contract-watch.git",
   "author": "",
   "license": "MIT",
