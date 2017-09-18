@@ -21,18 +21,18 @@ const validateBlockNumber = (blockNumber) => true;
  * @param {*} args 
  * return: Array
  */
-const selectArgs = (args) => {  
+const selectArgs = (args) => {
 
   if (args.length != 3)
     throw new Error("Command length error");
 
-  if(!validateBlockNumber(args[0]))
+  if (!validateBlockNumber(args[0]))
     throw new Error(`${args[0]} is not valid Block number`);
-  
-  if(!validateBlockNumber(args[1]))
+
+  if (!validateBlockNumber(args[1]))
     throw new Error(`${args[1]} is not valid Block number`);
-  
-  if(!isAddress(args[2]))
+
+  if (!isAddress(args[2]))
     throw new Error(`${args[0]} is not valid Address`);
 
   return args;
@@ -42,15 +42,17 @@ const selectArgs = (args) => {
 /**
  * The main function that has the full steps
  */
-const main = () => {
+const main = async () => {
   const args = process.argv.slice(2);
 
   const [fromBlock, toBlock, address] = selectArgs(args);
 
-  const abiFilePath = getABI(address);
+  const abiFilePath = await getABI(address);
 
   startTransactionsParsing(fromBlock, toBlock, address);
 
 }
 
-main()
+main().catch((e) => {
+  console.log(e)
+});

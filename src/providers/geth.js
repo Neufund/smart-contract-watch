@@ -4,8 +4,16 @@
  * to get all the transactions for givien address using geth node
  * 
  */
-
 import { decodeInputData } from '../input_data_decoder'
+// Connect to server
+
+import socketIo from 'socket.io';
+import { SOCKET_IO_PORT } from './config'
+import io from 'socket.io-client'
+
+const TIMER = 2000;
+
+const socket = io.connect(`http://localhost:${SOCKET_IO_PORT}`, { reconnect: true });
 
 // Temporary object
 const singleTransactionTemplate = {
@@ -22,23 +30,23 @@ const singleTransactionTemplate = {
     "input": "0x57cb2fc4"
 }
 
-const TIMER = 1000;
-
 const getTransaction = () => singleTransactionTemplate;
 
 
 /**
- * This will save the transaction and its decoded input in the rabbitmq
+ * This send the transaction and the decoded input to the event lister
  * 
  * @param address
  * @param tx
  * @param decodedInputData
  */
-const sendToRabbitMq = (address, tx, decodedInputData) => console.log(`tx: ${tx}, decoded: ${decodedInputData} sent to Rabbit`);
+const emitTransaction = (address, tx, decodedInputData) => {
+    socket.emit('tx', { address: address, tx: tx, decodedInputData: decodedInputData });
+}
 
 
 /**
- * This represets a serial of JSONRPC requests to Geth
+ * This represets a serial of JSONRPC requests to Geth and emit each transaction by socket io
  * 
  * @param blockFrom
  * @param blockTo
@@ -47,6 +55,5 @@ const sendToRabbitMq = (address, tx, decodedInputData) => console.log(`tx: ${tx}
 export const startTransactionsParsing = async (blockFrom, blockTo, address) => setInterval(() => {
     const tx = getTransaction();
     const decodedInputData = decodeInputData(tx);
-    emitTrx(address, tx, decodedInputData);
-    // sendToRabbitMq(address, tx, decodedInputData);
+    emitTransaction(address, tx, decodedInputData);    
 }, TIMER);
