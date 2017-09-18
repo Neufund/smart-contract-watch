@@ -1,0 +1,17 @@
+{
+  "name": "smart-contract-watch",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/Neufund/smart-contract-watch.git",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "build": "./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist",
+    "start": ""
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-env": "^1.6.0"
+  }
+}
