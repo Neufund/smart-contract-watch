@@ -1,7 +1,7 @@
 /**
  * 
  * This is private function 
- * that saves the file ABI object int file
+ * that saves the file ABI object into file locally
  *
  * @param address
  * return: string 

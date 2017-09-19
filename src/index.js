@@ -1,6 +1,8 @@
-import { isAddress } from 'ethereum-address';
+import logger from './logger';
+import { isAddress } from './web3/utils';
 import { getABI } from './providers/etherscan';
 import startTransactionsParsing from './providers/geth';
+
 /**
  * 
  * 1- Get The ABI from ether scan
@@ -47,6 +49,9 @@ const main = async () => {
   startTransactionsParsing(fromBlock, toBlock, address);
 };
 
+logger.log('info', 'Hello log files!', {
+  someKey: 'some-value'
+})
+
 main().catch((e) => {
-  console.log(e);
 });

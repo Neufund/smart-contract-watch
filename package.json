@@ -11,7 +11,7 @@
     "start": "(cp -n .env.example .env || true) & ./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist && node ./dist ",
     "lint": "eslint src",
     "fix": "eslint src --fix",
-    "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register"
+    "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register 'test/**/*.spec.js?(x)'"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -28,9 +28,8 @@
   },
   "dependencies": {
     "dotenv": "^4.0.0",
-    "ethereum-address": "^0.0.4",
     "socket.io": "^2.0.3",
     "socket.io-client": "^2.0.3",
-    "web3": "^1.0.0-beta.20"
+    "web3": "0.19.0"
   }
 }

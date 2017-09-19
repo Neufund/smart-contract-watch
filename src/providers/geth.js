@@ -5,6 +5,7 @@
  * 
  */
 import io from 'socket.io-client';
+import logger from '../logger';
 import decodeInputData from '../input_data_decoder';
 import { getSocketPortNumber } from '../config';
 
@@ -38,6 +39,10 @@ const getTransaction = () => singleTransactionTemplate;
  * @param decodedInputData
  */
 const emitTransaction = (address, tx, decodedInputData) => {
+  logger.log('debug', 'Transaction sent', {
+    address: address
+  })
+  
   socket.emit('tx', { address, tx, decodedInputData });
 };
 
