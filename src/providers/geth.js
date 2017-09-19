@@ -5,7 +5,7 @@
  * 
  */
 import io from 'socket.io-client';
-import { decodeInputData } from '../input_data_decoder';
+import decodeInputData from '../input_data_decoder';
 import { getSocketPortNumber } from '../config';
 
 const TIMER = 2000;
@@ -51,6 +51,6 @@ const emitTransaction = (address, tx, decodedInputData) => {
  */
 export default async (blockFrom, blockTo, address) => setInterval(() => {
   const tx = getTransaction();
-  const decodedInputData = decodeInputData(tx);
-  emitTransaction(address, tx, decodedInputData);
+  const data = decodeInputData(tx);
+  emitTransaction(address, tx, {});
 }, TIMER);
