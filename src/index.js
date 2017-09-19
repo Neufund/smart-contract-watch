@@ -56,5 +56,5 @@ const main = async () => {
 };
 
 
-main().catch(() => {
+main().catch((e) => {
 });
