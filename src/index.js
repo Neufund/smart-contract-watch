@@ -46,8 +46,15 @@ const main = async () => {
 
   const abiFilePath = await getABI(address); // eslint-disable-line no-unused-vars
 
+  logger.log('info', 'Start analysing!', {
+    fromBlock,
+    toBlock,
+    address,
+  });
+
   startTransactionsParsing(fromBlock, toBlock, address);
 };
+
 
 main().catch(() => {
 });
