@@ -6,7 +6,7 @@ export default new (winston.Logger)({
     new (winston.transports.Console)({
       timestamp: true,
       level: getLogLevel(),
-      colorize: true
-    })
-  ]
+      colorize: true,
+    }),
+  ],
 });

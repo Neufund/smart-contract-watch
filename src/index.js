@@ -49,9 +49,5 @@ const main = async () => {
   startTransactionsParsing(fromBlock, toBlock, address);
 };
 
-logger.log('info', 'Hello log files!', {
-  someKey: 'some-value'
-})
-
-main().catch((e) => {
+main().catch(() => {
 });

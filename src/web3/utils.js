@@ -1,3 +1,5 @@
-import web3Instance from "./web3Provider";
+import web3Instance from './web3Provider';
 
-export const isAddress = (address) => web3Instance.isAddress(address);
+
+// eslint-disable-next-line import/prefer-default-export
+export const isAddress = address => web3Instance.isAddress(address);

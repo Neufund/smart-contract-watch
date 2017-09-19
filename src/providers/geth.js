@@ -40,9 +40,9 @@ const getTransaction = () => singleTransactionTemplate;
  */
 const emitTransaction = (address, tx, decodedInputData) => {
   logger.log('debug', 'Transaction sent', {
-    address: address
-  })
-  
+    address,
+  });
+
   socket.emit('tx', { address, tx, decodedInputData });
 };
 
@@ -57,5 +57,5 @@ const emitTransaction = (address, tx, decodedInputData) => {
 export default async (blockFrom, blockTo, address) => setInterval(() => {
   const tx = getTransaction();
   const data = decodeInputData(tx);
-  emitTransaction(address, tx, {});
+  emitTransaction(address, tx, data);
 }, TIMER);

@@ -10,6 +10,6 @@ app.listen(getSocketPortNumber());
 
 io.on('connection', (socket) => {
   socket.on('tx', (data) => {
-    logger.log('debug','New entry', data.address);
+    logger.log('debug', 'New entry', data.address);
   });
 });
