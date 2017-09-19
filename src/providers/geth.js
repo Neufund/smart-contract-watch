@@ -6,11 +6,11 @@
  */
 import io from 'socket.io-client';
 import { decodeInputData } from '../input_data_decoder';
-import { SOCKET_IO_PORT } from '../config';
+import { getSocketPortNumber } from '../config';
 
 const TIMER = 2000;
 
-const socket = io.connect(`http://localhost:${SOCKET_IO_PORT}`, { reconnect: true });
+const socket = io.connect(`http://localhost:${getSocketPortNumber()}`, { reconnect: true });
 
 // Temporary object
 const singleTransactionTemplate = {

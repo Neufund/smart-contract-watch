@@ -8,7 +8,7 @@ const decodeInputData = (transaction) => {
   if (transaction.input !== undefined) {
     return {
       function: 'function_name',
-      params: ['pa ram1', 'param2', 'param3'],
+      params: ['param1', 'param2', 'param3'],
     };
   }
   return null;
