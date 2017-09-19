@@ -8,7 +8,9 @@
   "license": "MIT",
   "scripts": {
     "build": "./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist",
-    "start": ""
+    "start": "./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist && node ./dist ",
+    "lint": "eslint src",
+    "fix": "eslint src --fix"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -16,8 +18,15 @@
     "babel-preset-env": "^1.6.0"
   },
   "dependencies": {
+    "eslint": "^4.7.0",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-config-airbnb-base": "^12.0.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.3.0",
     "ethereum-address": "^0.0.4",
     "socket.io": "^2.0.3",
+    "socket.io-client": "^2.0.3",
     "web3": "^1.0.0-beta.20"
   }
 }

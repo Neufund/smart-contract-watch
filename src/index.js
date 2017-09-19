@@ -1,6 +1,6 @@
-import { getABI } from './providers/etherscan';
-import { startTransactionsParsing } from './providers/geth';
 import { isAddress } from 'ethereum-address';
+import { getABI } from './providers/etherscan';
+import startTransactionsParsing from './providers/geth';
 /**
  * 
  * 1- Get The ABI from ether scan
@@ -13,7 +13,7 @@ import { isAddress } from 'ethereum-address';
  */
 
 
-const validateBlockNumber = (blockNumber) => true;
+const validateBlockNumber = blockNumber => blockNumber;
 
 /**
  * 
@@ -22,21 +22,16 @@ const validateBlockNumber = (blockNumber) => true;
  * return: Array
  */
 const selectArgs = (args) => {
+  if (args.length !== 3) { throw new Error('Command length error'); }
 
-  if (args.length != 3)
-    throw new Error("Command length error");
+  if (!validateBlockNumber(args[0])) { throw new Error(`${args[0]} is not valid Block number`); }
 
-  if (!validateBlockNumber(args[0]))
-    throw new Error(`${args[0]} is not valid Block number`);
+  if (!validateBlockNumber(args[1])) { throw new Error(`${args[1]} is not valid Block number`); }
 
-  if (!validateBlockNumber(args[1]))
-    throw new Error(`${args[1]} is not valid Block number`);
-
-  if (!isAddress(args[2]))
-    throw new Error(`${args[0]} is not valid Address`);
+  if (!isAddress(args[2])) { throw new Error(`${args[0]} is not valid Address`); }
 
   return args;
-}
+};
 
 
 /**
@@ -47,12 +42,11 @@ const main = async () => {
 
   const [fromBlock, toBlock, address] = selectArgs(args);
 
-  const abiFilePath = await getABI(address);
+  const abiFilePath = await getABI(address); // eslint-disable-line no-unused-vars
 
   startTransactionsParsing(fromBlock, toBlock, address);
-
-}
+};
 
 main().catch((e) => {
-  console.log(e)
+  console.log(e);
 });

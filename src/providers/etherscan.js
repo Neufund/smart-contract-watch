@@ -6,9 +6,7 @@
  * @param address
  * return: string 
  */
-export const _saveABIFile = (data) => {   
-    return 'FILE_PATH'
-}
+export const saveABIFile = data => 'FILE_PATH'; // eslint-disable-line no-unused-vars
 
 /**
  * 
@@ -19,13 +17,13 @@ export const _saveABIFile = (data) => {
  * return: string 
  */
 export const getABI = async (address) => {
-
   const abi = [
-    { 'abi': 1234}
-  ]
-  
-  const filePath = _saveABIFile(abi);
+    { abi: 1234,
+      address },
+  ];
+
+  const filePath = saveABIFile(abi);
 
   return filePath;
-}
+};
 
