@@ -1,14 +1,17 @@
 /**
- * 
- * This will return get function name and parameters out 
+ *
+ * This will return get function name and parameters out
  * of the trasnaction input attribute if exists.
- * 
+ *
  */
-
-export const decodeInputData = (transaction) => {
-    if( transaction['input'] !== undefined)
+const decodeInputData = (transaction) => {
+  if (transaction.input !== undefined) {
     return {
-        function : 'function_name',
-        params: ['param1', 'param2' ,'param3']
-    }
-}
+      function: 'function_name',
+      params: ['pa ram1', 'param2', 'param3'],
+    };
+  }
+  return 0;
+};
+
+export default decodeInputData;
