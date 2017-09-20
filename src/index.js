@@ -1,21 +1,25 @@
 import logger from './logger';
 import { isAddress } from './web3/utils';
-import { getABI } from './providers/etherscan';
+import getABIs from './etherscan';
+import { getProviderName } from './config';
 import startTransactionsParsing from './providers/geth';
-
+import { decodeInputData, decodeLog } from './decoder';
+import { JsonRpc } from './providers/jsonrpc';
 /**
  * 
  * 1- Get The ABI from ether scan
  * 2- Store ABI in file
  * 3- Get transactions from Ethereum node
- * 4- Decode each transaction
- * 5- Send each decoded transaction to rabbitmq
- * 6- Read data from Rabbitmq and print to screen for now
+ * 4- Decode each transaction and its logs
+ * 5- Send each decoded data into the output module
  * 
  */
 
-
-const validateBlockNumber = blockNumber => blockNumber;
+/**
+ * this function check if block number is correct
+ * @param blockNumber
+ */
+const isBlockNumber = blockNumber => !isNaN(blockNumber);
 
 /**
  * 
@@ -26,15 +30,35 @@ const validateBlockNumber = blockNumber => blockNumber;
 const selectArgs = (args) => {
   if (args.length !== 3) { throw new Error('Command length error'); }
 
-  if (!validateBlockNumber(args[0])) { throw new Error(`${args[0]} is not valid Block number`); }
+  if (!isBlockNumber(args[0])) { throw new Error(`${args[0]} is not valid Block number`); }
 
-  if (!validateBlockNumber(args[1])) { throw new Error(`${args[1]} is not valid Block number`); }
+  if (!isBlockNumber(args[1])) { throw new Error(`${args[1]} is not valid Block number`); }
 
   if (!isAddress(args[2])) { throw new Error(`${args[0]} is not valid Address`); }
 
   return args;
 };
 
+/**
+ * This is adapter function that will send the data to the chosen output module
+ * @param {*} data 
+ */
+const sendToOutput = (data) => {
+  logger.log('info', data);
+};
+
+/**
+ * This function will decode the transaction and the logs that happed inside it,
+ * then send them to the out put function 
+ * @param {*} transaction 
+ * @param {*} logs 
+ */
+const transactionHandler = (transaction, logs) => {
+  const decodedInputDataResult = decodeInputData(transaction);
+  const decodedLogsResult = logs.map(log => decodeLog(log));
+
+  logger.debug(transaction.hash, logs.length);
+};
 
 /**
  * The main function that has the full steps
@@ -44,17 +68,13 @@ const main = async () => {
 
   const [fromBlock, toBlock, address] = selectArgs(args);
 
-  const abiFilePath = await getABI(address); // eslint-disable-line no-unused-vars
+  logger.debug('Start working');
 
-  logger.log('info', 'Start analysing!', {
-    fromBlock,
-    toBlock,
-    address,
-  });
-
-  startTransactionsParsing(fromBlock, toBlock, address);
+  const addresss = address;
+  const jsonRpc = new JsonRpc(addresss, fromBlock, toBlock, transactionHandler);
+  jsonRpc.scanBlocks();
 };
 
-
-main().catch(() => {
+main().catch((e) => {
+  logger.error(e);
 });
