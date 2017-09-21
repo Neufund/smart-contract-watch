@@ -1,10 +1,8 @@
 import logger from './logger';
+import web3 from './web3/web3Provider';
 import { isAddress } from './web3/utils';
-import getABIs from './etherscan';
-import { getProviderName } from './config';
-import startTransactionsParsing from './providers/geth';
 import { decodeInputData, decodeLog } from './decoder';
-import { JsonRpc } from './providers/jsonrpc';
+import { JsonRpc } from './jsonrpc';
 /**
  * 
  * 1- Get The ABI from ether scan
@@ -43,7 +41,7 @@ const selectArgs = (args) => {
  * This is adapter function that will send the data to the chosen output module
  * @param {*} data 
  */
-const sendToOutput = (data) => {
+const sendToOutput = (...data) => {
   logger.log('info', data);
 };
 
@@ -54,10 +52,10 @@ const sendToOutput = (data) => {
  * @param {*} logs 
  */
 const transactionHandler = (transaction, logs) => {
-  const decodedInputDataResult = decodeInputData(transaction);
-  const decodedLogsResult = logs.map(log => decodeLog(log));
+  const decodedInputDataResult = decodeInputData(transaction); // eslint-disable-line
+  const decodedLogsResult = logs.map(log => decodeLog(log)); // eslint-disable-line
 
-  logger.debug(transaction.hash, logs.length);
+  sendToOutput(transaction.hash, logs.length);
 };
 
 /**
@@ -70,9 +68,15 @@ const main = async () => {
 
   logger.debug('Start working');
 
-  const addresss = address;
-  const jsonRpc = new JsonRpc(addresss, fromBlock, toBlock, transactionHandler);
-  jsonRpc.scanBlocks();
+  const addresses = [address];
+  const jsonRpc = new JsonRpc(addresses, fromBlock, toBlock, web3, transactionHandler);
+  jsonRpc.scanBlocks().then(
+    () =>
+      logger.info('Finish scanning all the blocks')
+  ).catch(
+    (e) => {
+      throw new Error(e);
+    });
 };
 
 main().catch((e) => {

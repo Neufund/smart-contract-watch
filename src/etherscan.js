@@ -1,4 +1,3 @@
-import web3 from './web3/web3Provider';
 import fs from 'fs';
 /**
  * 

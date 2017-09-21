@@ -19,8 +19,6 @@ export const decodeInputData = (transaction) => {
  * Decoding log that generated from the event
  * @param {*} log 
  */
-export const decodeLog = log =>
+export const decodeLog = log => // eslint-disable-line 
   // @todo: implement it
-  ({
-  })
-;
+  log;

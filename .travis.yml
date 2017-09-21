@@ -10,3 +10,4 @@ install:
   - yarn
 script:
   - yarn eslint src
+  - yarn test

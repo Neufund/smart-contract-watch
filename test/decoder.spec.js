@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import decodeInputData from '../src/input_data_decoder';
+import { decodeInputData } from '../src/decoder';
 
 describe('decodeInputData', () => {
     
@@ -31,5 +31,4 @@ describe('decodeInputData', () => {
         const decodedInput = decodeInputData(transactionSample);
         expect(decodedInput).to.be.equal(null);
     });
-
 });
