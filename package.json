@@ -2,9 +2,9 @@
   "name": "smart-contract-watch",
   "version": "1.0.0",
   "main": "index.js",
-  "description": "Smart-Contract-Watch a service that watches smart contracts in the block chain and the transactions they conduct",
   "repository": "https://github.com/Neufund/smart-contract-watch.git",
   "author": "",
+  "description": "Smart-Contract-Watch a service that watches smart contracts in the block chain and the transactions they conduct",
   "license": "MIT",
   "scripts": {
     "build": "./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist",
@@ -13,26 +13,24 @@
     "fix": "eslint src --fix",
     "test": "(cp -n .env.example .env || true) & ./node_modules/mocha/bin/mocha --compilers js:babel-core/register 'test/**/*.spec.js?(x)'"
   },
+  "dependencies": {
+    "commander": "^2.11.0",
+    "dotenv": "^4.0.0",
+    "web3": "0.19.0",
+    "winston": "^2.3.1"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "babel-preset-stage-0": "^6.24.1",
     "chai": "^4.1.2",
-    "eslint": "^4.7.0",
+    "eslint": "^4.7.1",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-airbnb-base": "^12.0.0",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.3.0",
     "mocha": "^3.5.3"
-  },
-  "dependencies": {
-    "dotenv": "^4.0.0",
-    "socket.io": "^2.0.3",
-    "socket.io-client": "^2.0.3",
-    "web3": "0.19.0",
-    "winston": "2.3.1"
   }
 }
-
