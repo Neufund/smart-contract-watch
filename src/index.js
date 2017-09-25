@@ -3,13 +3,15 @@ import command from './command';
 import web3 from './web3/web3Provider';
 import { decodeInputData, decodeLog } from './decoder';
 import { JsonRpc } from './jsonrpc';
+import output from './output';
+
 /**
  * 
- * 1- Get The ABI from ether scan
- * 2- Store ABI in file
- * 3- Get transactions from Ethereum node
- * 4- Decode each transaction and its logs
- * 5- Send each decoded data into the output module
+ * 1- Get smart contract ABI from etherscan
+ * 2- Store smart contract ABI locally
+ * 3- Get transactions from ledger
+ * 4- Decode transactions/logs asynchronously
+ * 5- Send final data into output module
  * 
  */
 
@@ -19,7 +21,7 @@ import { JsonRpc } from './jsonrpc';
  * @param {*} data 
  */
 const sendToOutput = (...data) => {
-  logger.log('info', data);
+  output(data);
 };
 
 /**
@@ -28,11 +30,13 @@ const sendToOutput = (...data) => {
  * @param {*} transaction 
  * @param {*} logs 
  */
-const transactionHandler = (transaction, logs) => {
+const transactionHandler = (transaction) => {
   const decodedInputDataResult = decodeInputData(transaction); // eslint-disable-line
-  const decodedLogsResult = logs.map(log => decodeLog(log)); // eslint-disable-line
-
-  sendToOutput(transaction.hash, logs.length);
+  let decodedLogs;
+  if (transaction.logs.length > 0) {
+    decodedLogs = transaction.logs.map(log => decodeLog(log)) // eslint-disable-line
+  }
+  sendToOutput(decodedInputDataResult, decodedLogs);
 };
 
 /**

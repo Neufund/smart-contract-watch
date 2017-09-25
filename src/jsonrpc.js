@@ -31,31 +31,39 @@ export class JsonRpc {
    * This will return the final data structure 
    * for the transaction resopnse
    * @param {*} tx 
-   * @param {*} receipt  
+   * @param {*} receipt
+   * @param {*} logs
    * @return object
    */
-  _getTransaction(tx, receipt) {
-    return { ...tx, ...receipt };
+  static _getTransaction(tx, receipt, logs) {
+    const receiptResult = receipt;
+    // delete the logs, because theres no need for them in this response
+    delete receiptResult.logs;
+    return { ...tx, ...receiptResult, logs };
   }
 
   /**
-   * Async function that get the transaction and transaction receipt then get the 
-   * logs out of the receipt transaction then execute the callback function
+   * Async function that gets the transaction and transaction receipt 
+   * then get the logs out of the receipt transaction then execute the callback function  
    * @param {*} txn
    */
   async _scanTransaction(txn) {
     const txnReceipts = await toPromise(this.web3Instance.getTransactionReceipt)(txn.hash);
     if ((txn.to && this.addresses.indexOf(txn.to.toLowerCase()) >= 0) ||
       (txn.from && this.addresses.indexOf(txn.from.toLowerCase()) >= 0)) {
+      const logs = txnReceipts.logs.filter(log => this.addresses.indexOf(log.address) >= 0);
+
       const txnNormal = await toPromise(this.web3Instance.getTransaction)(txn.hash);
-      const transactionResult = this._getTransaction(txnNormal, txnReceipts);
-      if (this.callback) { this.callback(transactionResult, txnReceipts.logs); }
+
+      const transactionResult = JsonRpc._getTransaction(txnNormal, txnReceipts, logs);
+
+      if (this.callback) { this.callback(transactionResult); }
     }
   }
 
   /**
-   * This function handling the tranactions that exists in one block and 
-   * put them into promises array, then execute them once
+   * This function handles the transactions that exist in one block
+   *  and puts them into an array of promises, then executes them.
    * @param {*} block 
    */
   async _scanBlockCallback(block) {
