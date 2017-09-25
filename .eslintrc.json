@@ -13,6 +13,7 @@
       "functions": "never"
    }],
    "no-confusing-arrow": 0,
-   "jsx-a11y/href-no-hash": "off"
+   "jsx-a11y/href-no-hash": "off",
+   "no-underscore-dangle": "off"   
   }
 }

@@ -4,14 +4,22 @@
  * of the trasnaction input attribute if exists.
  *
  */
-const decodeInputData = (transaction) => {
+export const decodeInputData = (transaction) => {
+  // @todo: implement it
   if (transaction.input !== undefined) {
     return {
       function: 'function_name',
       params: ['param1', 'param2', 'param3'],
     };
   }
+
   return null;
 };
 
-export default decodeInputData;
+/**
+ * Decoding log that generated from the event
+ * @param {*} log 
+ */
+export const decodeLog = log => // eslint-disable-line 
+  // @todo: implement it
+  log;
