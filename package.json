@@ -2,9 +2,9 @@
   "name": "smart-contract-watch",
   "version": "1.0.0",
   "main": "index.js",
-  "description": "Smart-Contract-Watch a service that watches smart contracts in the block chain and the transactions they conduct",
   "repository": "https://github.com/Neufund/smart-contract-watch.git",
   "author": "",
+  "description": "Smart-Contract-Watch a service that watches smart contracts in the block chain and the transactions they conduct",
   "license": "MIT",
   "scripts": {
     "build": "./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist",
@@ -31,6 +31,7 @@
     "sinon": "^4.0.0"
   },
   "dependencies": {
+    "abi-decoder": "^1.0.8",
     "commander": "^2.11.0",
     "dotenv": "^4.0.0",
     "request": "^2.82.0",
