@@ -6,12 +6,13 @@ import consensysDecode from 'abi-decoder';
  * of the trasnaction input attribute if exists.
  *
  */
-export const decodeInputData = (InputData, abi) => {
+export const decodeInputData = (inputData, abi) => {
   consensysDecode.addABI(abi);
-  if (InputData !== undefined) {
-    return consensysDecode.decodeMethod(InputData);
+  if (inputData !== undefined) {
+    const data = consensysDecode.decodeMethod(inputData);
+    if (data === undefined) { throw new Error('Problem with input data'); } else return data;
   }
-  throw new Error('Problem with InputData');
+  throw new Error('Problem with input data check if data is sent correctly');
 };
 
 /**
