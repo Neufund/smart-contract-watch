@@ -8,6 +8,8 @@ const expectedResponse = {
   OK: 'OK',
 };
 
+
+const etherscanRequest = async options => rp.get(options);
 /**
  *  Validate if Etherscan response was succssefful should
  *  throw if a reponse had an error
@@ -20,20 +22,7 @@ const validateResponse = (response) => {
   }
   throw new Error('Wrong response from Etherscan or wrong Contract Address');
 };
-/**
- *   Save Given ABI object in a local file
- *   throw if a reponse had an error
- *   @param abi: Object
- *   @param filepath: string
- *
- */
-const saveABIFile = async (abi, filepath) => {
-  try {
-    fs.writeFileSync(filepath, abi);
-  } catch (err) {
-    throw new Error('Problem with writing ABI file');
-  }
-};
+
 /**
  *   Scrape ABI from Etherscan
  *   throw if a reponse had an error
@@ -41,6 +30,7 @@ const saveABIFile = async (abi, filepath) => {
  *   @param jsonPath: string
  *   @return object
  */
+
 const scrapeABI = async (address) => {
   const options = {
     uri: 'https://api.etherscan.io/api?module=contract',
@@ -55,7 +45,8 @@ const scrapeABI = async (address) => {
     json: true,
 
   };
-  const abi = await rp(options);
+
+  const abi = await etherscanRequest(options);
   validateResponse(await abi);
   return JSON.parse(abi.result);
 };
@@ -72,7 +63,7 @@ export const getABI = async (address) => {
 
   if (!fs.existsSync(jsonPath)) {
     const abi = await scrapeABI(address);
-    saveABIFile(JSON.stringify(abi), jsonPath);
+    fs.writeFileSync(jsonPath, JSON.stringify(abi));
     return abi;
   }
 
@@ -80,7 +71,7 @@ export const getABI = async (address) => {
     return JSON.parse(fs.readFileSync(jsonPath, { encoding: 'utf8' }));
   } catch (err) {
     fs.unlinkSync(jsonPath);
-    throw new Error('Invalid local ABI getting from Etherscan');
+    throw new Error('Invalid local ABI');
   }
 };
 

@@ -1,14 +1,15 @@
 import chai from 'chai';
+import fs from 'fs';
+import sinon from 'sinon';
 import rimraf from 'rimraf';
 import chaiAsPromised from 'chai-as-promised';
+import rp from 'request-promise';
 import { getABI } from '../src/etherscan';
+import { mockABI } from './mockedData/mockABI';
 
 chai.use(chaiAsPromised);
 chai.should();
 const expect = chai.expect;
-const fs = (require('fs'));
-
-const TestABI = [{ constant: false, inputs: [{ name: 'e', type: 'address' }, { name: 'extraOptions', type: 'uint32' }], name: 'increaseEmployeeExtraOptions', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'employees', outputs: [{ name: '', type: 'address' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'exerciseOptionsDeadline', outputs: [{ name: '', type: 'uint32' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'totalExtraOptions', outputs: [{ name: '', type: 'uint256' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'MINIMUM_MANUAL_SIGN_PERIOD', outputs: [{ name: '', type: 'uint32' }], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'migration', type: 'address' }], name: 'employeeMigratesToNewESOP', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'esopState', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'rootOfTrust', outputs: [{ name: '', type: 'address' }], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'e', type: 'address' }, { name: 'terminatedAt', type: 'uint32' }, { name: 'terminationType', type: 'uint8' }], name: 'terminateEmployee', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'agreeToAcceleratedVestingBonusConditions', type: 'bool' }], name: 'employeeExerciseOptions', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'companyAddress', outputs: [{ name: '', type: 'address' }], payable: false, type: 'function' }, { constant: false, inputs: [], name: 'employeeDenyExerciseOptions', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'e', type: 'address' }, { name: 'toggledAt', type: 'uint32' }], name: 'toggleEmployeeSuspension', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'optionsCalculator', outputs: [{ name: '', type: 'address' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'codeUpdateState', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: false, inputs: [], name: 'removeEmployeesWithExpiredSignaturesAndReturnFadeout', outputs: [], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'pTotalPoolOptions', type: 'uint32' }, { name: 'pESOPLegalWrapperIPFSHash', type: 'bytes' }], name: 'openESOP', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'owner', outputs: [{ name: '', type: 'address' }], payable: false, type: 'function' }, { constant: false, inputs: [], name: 'cancelCodeUpdate', outputs: [], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'e', type: 'address' }, { name: 'disableAcceleratedVesting', type: 'bool' }], name: 'exerciseExpiredEmployeeOptions', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'ESOPLegalWrapperIPFSHash', outputs: [{ name: '', type: 'bytes' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'conversionOfferedAt', outputs: [{ name: '', type: 'uint32' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'remainingPoolOptions', outputs: [{ name: '', type: 'uint256' }], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'employee', type: 'address' }, { name: 'migration', type: 'address' }], name: 'allowEmployeeMigration', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: true, inputs: [{ name: 'e', type: 'address' }, { name: 'calcAtTime', type: 'uint32' }], name: 'calcEffectiveOptionsForEmployee', outputs: [{ name: '', type: 'uint256' }], payable: false, type: 'function' }, { constant: false, inputs: [], name: 'beginCodeUpdate', outputs: [], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'converter', type: 'address' }], name: 'offerOptionsConversion', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 't', type: 'uint32' }], name: 'mockTime', outputs: [], payable: false, type: 'function' }, { constant: false, inputs: [], name: 'completeCodeUpdate', outputs: [], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'e', type: 'address' }, { name: 'issueDate', type: 'uint32' }, { name: 'timeToSign', type: 'uint32' }, { name: 'extraOptions', type: 'uint32' }, { name: 'poolCleanup', type: 'bool' }], name: 'offerOptionsToEmployee', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'currentTime', outputs: [{ name: '', type: 'uint32' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'optionsConverter', outputs: [{ name: '', type: 'address' }], payable: false, type: 'function' }, { constant: true, inputs: [], name: 'totalPoolOptions', outputs: [{ name: '', type: 'uint256' }], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'newOwner', type: 'address' }], name: 'transferOwnership', outputs: [], payable: false, type: 'function' }, { constant: false, inputs: [], name: 'employeeSignsToESOP', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { constant: false, inputs: [{ name: 'e', type: 'address' }, { name: 'issueDate', type: 'uint32' }, { name: 'timeToSign', type: 'uint32' }, { name: 'extraOptions', type: 'uint32' }], name: 'offerOptionsToEmployeeOnlyExtra', outputs: [{ name: '', type: 'uint8' }], payable: false, type: 'function' }, { inputs: [{ name: 'company', type: 'address' }, { name: 'pRootOfTrust', type: 'address' }, { name: 'pOptionsCalculator', type: 'address' }, { name: 'pEmployeesList', type: 'address' }], payable: false, type: 'constructor' }, { payable: true, type: 'fallback' }, { anonymous: false, inputs: [{ indexed: true, name: 'employee', type: 'address' }, { indexed: false, name: 'company', type: 'address' }, { indexed: false, name: 'poolOptions', type: 'uint32' }, { indexed: false, name: 'extraOptions', type: 'uint32' }], name: 'ESOPOffered', type: 'event' }, { anonymous: false, inputs: [{ indexed: true, name: 'employee', type: 'address' }], name: 'EmployeeSignedToESOP', type: 'event' }, { anonymous: false, inputs: [{ indexed: true, name: 'employee', type: 'address' }, { indexed: false, name: 'suspendedAt', type: 'uint32' }], name: 'SuspendEmployee', type: 'event' }, { anonymous: false, inputs: [{ indexed: true, name: 'employee', type: 'address' }, { indexed: false, name: 'continuedAt', type: 'uint32' }, { indexed: false, name: 'suspendedPeriod', type: 'uint32' }], name: 'ContinueSuspendedEmployee', type: 'event' }, { anonymous: false, inputs: [{ indexed: true, name: 'employee', type: 'address' }, { indexed: false, name: 'company', type: 'address' }, { indexed: false, name: 'terminatedAt', type: 'uint32' }, { indexed: false, name: 'termType', type: 'uint8' }], name: 'TerminateEmployee', type: 'event' }, { anonymous: false, inputs: [{ indexed: true, name: 'employee', type: 'address' }, { indexed: false, name: 'exercisedFor', type: 'address' }, { indexed: false, name: 'poolOptions', type: 'uint32' }, { indexed: false, name: 'disableAcceleratedVesting', type: 'bool' }], name: 'EmployeeOptionsExercised', type: 'event' }, { anonymous: false, inputs: [{ indexed: true, name: 'employee', type: 'address' }, { indexed: false, name: 'migration', type: 'address' }, { indexed: false, name: 'pool', type: 'uint256' }, { indexed: false, name: 'extra', type: 'uint256' }], name: 'EmployeeMigrated', type: 'event' }, { anonymous: false, inputs: [{ indexed: false, name: 'company', type: 'address' }], name: 'ESOPOpened', type: 'event' }, { anonymous: false, inputs: [{ indexed: false, name: 'company', type: 'address' }, { indexed: false, name: 'converter', type: 'address' }, { indexed: false, name: 'convertedAt', type: 'uint32' }, { indexed: false, name: 'exercisePeriodDeadline', type: 'uint32' }], name: 'OptionsConversionOffered', type: 'event' }, { anonymous: false, inputs: [{ indexed: false, name: 'rc', type: 'uint8' }], name: 'ReturnCode', type: 'event' }];
 
 const path = require('path');
 
@@ -17,24 +18,32 @@ describe('GetABI', () => {
   const wrongAddress = '0xda7c27c04f66842faf20644814b644e25e1766eb';
   const dirpath = path.join(__dirname, '..', 'contracts');
   const jsonPath = path.join(dirpath, `${address}.json`);
-
+  const jsonMock = path.join(__dirname, 'mockedData', 'etherscanSuccsess.json');
+  const jsonFailMock = path.join(__dirname, 'mockedData', 'etherscanFail.json');
   beforeEach(() => {
     rimraf.sync(dirpath);
+    sinon.stub(rp, 'get').returns(Promise.resolve(JSON.parse(fs.readFileSync(jsonMock, { encoding: 'utf8' }))));
   });
+
   it('should create a contract directory if there was non', async () => {
     await getABI(address);
     expect(fs.existsSync(dirpath)).to.be.equal(true);
   });
   it('should scrape smart-contract ABI from etherscan and store locally', async () => {
     const EtherscanABi = await getABI(address);
-    expect(await EtherscanABi).to.deep.equal(TestABI);
-    expect(JSON.parse(fs.readFileSync(jsonPath, { encoding: 'utf8' }))).to.deep.equal(TestABI);
+    expect(await EtherscanABi).to.deep.equal(mockABI);
+    expect(JSON.parse(fs.readFileSync(jsonPath, { encoding: 'utf8' }))).to.deep.equal(mockABI);
   });
   it('should take ABI from local file when present', async () => {
     await getABI(address);
     expect(JSON.parse(fs.readFileSync(jsonPath, { encoding: 'utf8' }))).to.deep.equal(await getABI(address));
   });
   it('should throw if etherscan returns a failed REST response', async () => {
+    rp.get.restore();
+    sinon.stub(rp, 'get').returns(Promise.resolve(JSON.parse(fs.readFileSync(jsonFailMock, { encoding: 'utf8' }))));
     getABI(wrongAddress).should.be.rejectedWith('Wrong response from Etherscan or wrong Contract Address');
+  });
+  afterEach(() => {
+    rp.get.restore();
   });
 });
