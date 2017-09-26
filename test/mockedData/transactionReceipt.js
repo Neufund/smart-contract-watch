@@ -5,7 +5,7 @@ export default {
     cumulativeGasUsed: 21000,
     gasUsed: 21000,
     logs: [{
-        address: '0xa74476443119a942de498590fe1f2454d7d4ac0d',
+        address: '0xa74476443119a942de498590fe1f2454d7d4ac1d',
         blockHash: '0x225c988572025048f56879174f72268fc5b58b094281f52727864af1e9dd88a4',
         blockNumber: 3577534,
         data: '0x00000000000000000000000000000000000000000000020bd16296eb83098c00',

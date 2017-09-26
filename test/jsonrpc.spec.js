@@ -44,18 +44,15 @@ describe('JsonRpc', () => {
         jsonRpc = new JsonRpc(address, blockFrom, blockTo, web3, tranactionHandler);
     });
 
-    it('expectedIterations should equal callbackExecutedCounter', () => {
+    it('expectedIterations should equal callbackExecutedCounter', async () => {
         /**
-         * Number of all transactions are 19 in each block
-         * Number of transactions that have the targeted address is 3
+         * Number of all transactions are 20 in each block
+         * Number of transactions that have the targeted address is 3        
          */
         const expectedIterations = 3 * (blockTo - blockFrom);
 
-        jsonRpc.scanBlocks().then((e) => {
-            expect(callbackExecutedCounter).to.equal(expectedIterations)
-        }).catch((e) => {
-            throw new Error(e)
-        });
-    })
-
+        const r = await jsonRpc.scanBlocks();
+        expect(callbackExecutedCounter).to.equal(expectedIterations)
+    });
+    
 });

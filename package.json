@@ -14,6 +14,7 @@
     "test": "(cp -n .env.example .env || true) & ./node_modules/mocha/bin/mocha --compilers js:babel-core/register 'test/**/*.spec.js?(x)'"
   },
   "dependencies": {
+    "bluebird": "^3.5.0",
     "commander": "^2.11.0",
     "dotenv": "^4.0.0",
     "web3": "0.19.0",

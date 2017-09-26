@@ -1,3 +1,4 @@
+import bluebird from 'bluebird';
 import logger from './logger';
 
 /**
@@ -9,14 +10,19 @@ export const toPromise = func => (...args) =>
     func(...args, (error, result) => (error ? reject(new Error(error.message)) : resolve(result)))
   );
 
+/**
+ * @param Array array 
+ * @param {*} element 
+ */
+export const isInArray = (array, element) => array.indexOf(element) >= 0;
 
 export class JsonRpc {
   /**
    * Initialize class local variables
-   * @param {*} addresses 
-   * @param {*} fromBlock 
-   * @param {*} toBlock 
-   * @param {*} callback 
+   * @param Array addresses 
+   * @param int fromBlock 
+   * @param int toBlock 
+   * @param function callback 
    */
   constructor(addresses, fromBlock, toBlock, web3, callback = null) {
     this.addresses = addresses.map(address => address.toLowerCase());
@@ -30,33 +36,38 @@ export class JsonRpc {
    * 
    * This will return the final data structure 
    * for the transaction resopnse
-   * @param {*} tx 
-   * @param {*} receipt
-   * @param {*} logs
+   * @param string tx 
+   * @param Object receipt
+   * @param Array logs
    * @return object
    */
-  static _getTransaction(tx, receipt, logs) {
+  static getTransactionFormat(transaction, receipt, logs) {
     const receiptResult = receipt;
-    // delete the logs, because theres no need for them in this response
-    delete receiptResult.logs;
-    return { ...tx, ...receiptResult, logs };
+
+    receiptResult.logs = logs;
+    return { ...transaction, ...receiptResult };
   }
 
   /**
    * Async function that gets the transaction and transaction receipt 
    * then get the logs out of the receipt transaction then execute the callback function  
-   * @param {*} txn
+   * @param string txn
    */
   async _scanTransaction(txn) {
     const txnReceipts = await toPromise(this.web3Instance.getTransactionReceipt)(txn.hash);
-    if ((txn.to && this.addresses.indexOf(txn.to.toLowerCase()) >= 0) ||
-      (txn.from && this.addresses.indexOf(txn.from.toLowerCase()) >= 0)) {
-      const logs = txnReceipts.logs.filter(log => this.addresses.indexOf(log.address) >= 0);
+    const logs = txnReceipts.logs.filter(log => isInArray(this.addresses, log.address));
 
-      const txnNormal = await toPromise(this.web3Instance.getTransaction)(txn.hash);
+    /**
+     * This case should never happend, because we are cheching 
+     * the smart contract not the normal addresses
+     */
+    if (txn.from && isInArray(this.addresses, txn.from.toLowerCase())) {
+      throw new Error('Smart contract is shouldn\'t be in from');
+    }
 
-      const transactionResult = JsonRpc._getTransaction(txnNormal, txnReceipts, logs);
-
+    // If the smart contract recieved transaction or there's logs execute the callback function 
+    if ((txn.to && isInArray(this.addresses, txn.to.toLowerCase())) || logs.length > 0) {
+      const transactionResult = JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
       if (this.callback) { this.callback(transactionResult); }
     }
   }
@@ -64,7 +75,7 @@ export class JsonRpc {
   /**
    * This function handles the transactions that exist in one block
    *  and puts them into an array of promises, then executes them.
-   * @param {*} block 
+   * @param object block 
    */
   async _scanBlockCallback(block) {
     if (block.transactions) {
@@ -77,9 +88,9 @@ export class JsonRpc {
     }
   }
 
+
   /**
-   * Scanning all the blocks fromBlock and toBlock 
-   * which are internal variables passed via the constructor
+   * The main function that run scan all the blocks.
    */
   async scanBlocks() {
     if (this.fromBlock >= this.toBlock) {
@@ -87,10 +98,20 @@ export class JsonRpc {
       return;
     }
 
-    const block = await toPromise(this.web3Instance.getBlock)(this.fromBlock, true);
-    this.fromBlock = parseInt(this.fromBlock, 10) + 1;
-    await this._scanBlockCallback(block);
-    await this.scanBlocks(this.fromBlock);
+    try {
+      const block = await toPromise(this.web3Instance.getBlock)(this.fromBlock, true);
+      await this._scanBlockCallback(block);
+      this.fromBlock = parseInt(this.fromBlock, 10) + 1;
+      await this.scanBlocks(this.fromBlock);
+    } catch (e) {
+      if (e.message === 'Invalid JSON RPC response: ""') {
+        logger.error(`Network error ocurar, retry after ${2000} millisecond, from block number ${this.fromBlock}`);
+        bluebird.delay(2000).then(async () => {
+          await this.scanBlocks(this.fromBlock);
+        });
+      } else {
+        throw new Error(e.message);
+      }
+    }
   }
 }
-

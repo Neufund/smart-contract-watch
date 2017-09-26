@@ -20,7 +20,7 @@ import output from './output';
  * This is adapter function that will send the data to the chosen output module
  * @param {*} data 
  */
-const sendToOutput = (...data) => {
+const sendToOutput = (data) => {
   output(data);
 };
 
@@ -32,11 +32,11 @@ const sendToOutput = (...data) => {
  */
 const transactionHandler = (transaction) => {
   const decodedInputDataResult = decodeInputData(transaction); // eslint-disable-line
-  let decodedLogs;
+  let decodedLogs; // eslint-disable-line no-unused-vars
   if (transaction.logs.length > 0) {
-    decodedLogs = transaction.logs.map(log => decodeLog(log)) // eslint-disable-line
+    decodedLogs = transaction.logs.map(log => decodeLog(log)); // eslint-disable-line no-unused-vars
   }
-  sendToOutput(decodedInputDataResult, decodedLogs);
+  sendToOutput(transaction);
 };
 
 /**
@@ -46,15 +46,16 @@ const main = async () => {
   const { from, to, addresses } = command();
   logger.debug('Start working');
   const jsonRpc = new JsonRpc(addresses, from, to, web3, transactionHandler);
-  jsonRpc.scanBlocks().then(
-    () =>
-      logger.info('Finish scanning all the blocks')
-  ).catch(
-    (e) => {
-      throw new Error(e);
-    });
+
+  try {
+    await jsonRpc.scanBlocks();
+    logger.info('Finish scanning all the blocks');
+  } catch (e) {
+    logger.error(e.stack || e);
+  }
 };
 
 main().catch((e) => {
-  logger.error(e.message);
+  logger.error(`"Main catch ${e.message}`);
+  logger.error(e.stack || e);
 });
