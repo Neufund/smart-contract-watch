@@ -1,7 +1,7 @@
 import chai from 'chai';
 import fs from 'fs';
 import sinon from 'sinon';
-import path = from 'path';
+import path from 'path';
 import rimraf from 'rimraf';
 import chaiAsPromised from 'chai-as-promised';
 import rp from 'request-promise';
