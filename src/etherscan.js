@@ -1,43 +1,78 @@
+import rp from 'request-promise';
 import fs from 'fs';
+import path from 'path';
+import { getAccessToken } from './config';
+
+
+const expectedResponse = {
+  OK: 'OK',
+};
+
+
+const etherscanRequest = async options => rp.get(options);
 /**
- * 
- * This is private function 
- * that saves the file ABI object into file locally
+ *  Validate if Etherscan response was succssefful should
+ *  throw if a reponse had an error
+ *  @param reponse: object
  *
- * @param address
- * return: string 
  */
-export const saveABIFile = data => 'FILE_PATH'; // eslint-disable-line no-unused-vars
+const validateResponse = (response) => {
+  if (response.status && response.message === expectedResponse.OK) {
+    return;
+  }
+  throw new Error('Wrong response from Etherscan or wrong Contract Address');
+};
 
 /**
- * 
- * Get the ABI from `contracts` folder if eixsts otherwise get it 
- * from etherscan api then save it in file and return it 
- *
- * @param address
- * return: array 
+ *   Scrape ABI from Etherscan
+ *   throw if a reponse had an error
+ *   @param address: string
+ *   @param jsonPath: string
+ *   @return object
+ */
+
+const scrapeABI = async (address) => {
+  const options = {
+    uri: 'https://api.etherscan.io/api?module=contract',
+    qs: {
+      action: 'getabi',
+      address,
+      access_token: getAccessToken(),
+    },
+    headers: {
+      'User-Agent': 'Request-Promise',
+    },
+    json: true,
+
+  };
+
+  const abi = await etherscanRequest(options);
+  validateResponse(await abi);
+  return JSON.parse(abi.result);
+};
+/**
+ *   if ABI for a specific file is stored locally
+ *   If not scrape from Etherscan
+ *   @param address
+ *   @return Objcet(JSON)
  */
 export const getABI = async (address) => {
-  const filePath = `../contracts/${address}`;
-  let abi = null;
-  if (!fs.existsSync(filePath)) {
-    // @todo: request etherscan api
+  const dirPath = path.join(__dirname, '..', 'contracts');
+  const jsonPath = path.join(dirPath, `${address}.json`);
+  if (!fs.existsSync(dirPath)) { fs.mkdirSync(dirPath); }
 
-    saveABIFile(abi);
-    abi = [];
-  } else {
-    abi = fs.readFileSync(filePath, { encoding: 'utf8' });
+  if (!fs.existsSync(jsonPath)) {
+    const abi = await scrapeABI(address);
+    fs.writeFileSync(jsonPath, JSON.stringify(abi));
+    return abi;
   }
 
-  return abi;
+  try {
+    return JSON.parse(fs.readFileSync(jsonPath, { encoding: 'utf8' }));
+  } catch (err) {
+    fs.unlinkSync(jsonPath);
+    throw new Error('Invalid local ABI');
+  }
 };
 
-
-export default async (addresses) => {
-  const abis = [];
-  addresses.forEach((address) => {
-    const abi = getABI(address);
-    abis.push(abi);
-  });
-  return abis;
-};
+export default getABI;
