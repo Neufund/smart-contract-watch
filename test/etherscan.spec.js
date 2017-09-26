@@ -1,6 +1,7 @@
 import chai from 'chai';
 import fs from 'fs';
 import sinon from 'sinon';
+import path = from 'path';
 import rimraf from 'rimraf';
 import chaiAsPromised from 'chai-as-promised';
 import rp from 'request-promise';
@@ -11,7 +12,6 @@ chai.use(chaiAsPromised);
 chai.should();
 const expect = chai.expect;
 
-const path = require('path');
 
 describe('GetABI', () => {
   const address = '0xda7c27c04f66842faf20644814b644e25e1766ea';
