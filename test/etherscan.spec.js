@@ -1,7 +1,7 @@
 import chai from 'chai';
 import rimraf from 'rimraf';
 import chaiAsPromised from 'chai-as-promised';
-import { getABI } from '../src/providers/etherscan';
+import { getABI } from '../src/etherscan';
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -15,7 +15,7 @@ const path = require('path');
 describe('GetABI', () => {
   const address = '0xda7c27c04f66842faf20644814b644e25e1766ea';
   const wrongAddress = '0xda7c27c04f66842faf20644814b644e25e1766eb';
-  const dirpath = path.join(__dirname, '..', 'src/contracts');
+  const dirpath = path.join(__dirname, '..', 'contracts');
   const jsonPath = path.join(dirpath, `${address}.json`);
 
   beforeEach(() => {
