@@ -1,28 +1,33 @@
 import consensysDecode from 'abi-decoder';
 
 /**
+ * Decode Transaction input data
  *
- * This will return get function name and parameters out
- * of the trasnaction input attribute if exists.
- *
+ * @param Object inputData
+ * @param Object abi
+ * @return Object 
  */
 export const decodeInputData = (inputData, abi) => {
   consensysDecode.addABI(abi);
   if (inputData !== undefined) {
-    const data = consensysDecode.decodeMethod(inputData);
-    if (data === undefined) { throw new Error('Problem with input data'); } else return data;
+    const decodedData = consensysDecode.decodeMethod(inputData);
+    if (decodedData === undefined) { throw new Error('Problem with input data'); } else return decodedData;
   }
   throw new Error('Problem with input data check if data is sent correctly');
 };
 
 /**
- * Decoding log that generated from the event
- * @param {*} log
+ * Decoding transaction logs generated from an event
+ * in the ledger
+ * @param Object log
+ * @param Object abi
+ * @return Object
  */
-export const decodelogData = (logData, abi) => {
+export const decodeLogData = (logData, abi) => {
   consensysDecode.addABI(abi);
   if (logData !== undefined) {
-    return consensysDecode.decodeLogs(logData);
+    const Decodedlogs = consensysDecode.decodeLogs(logData);
+    if (Decodedlogs === undefined) { throw new Error('Problem with transaction Decodedlogs'); } else return Decodedlogs;
   }
-  throw new Error('Problem with Logs');
+  throw new Error('Problem with transaction Decodedlogs as input');
 };
