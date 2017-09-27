@@ -2,7 +2,7 @@ import bluebird from 'bluebird';
 import logger from './logger';
 import { isInArray } from './utils';
 
-export class JsonRpc {
+export default class JsonRpc {
   /**
    * Initialize class local variables
    * @param Array addresses 
@@ -86,7 +86,7 @@ export class JsonRpc {
     try {
       const block = await bluebird.promisify(this.web3Instance.getBlock)(this.currentBlock, true);
       await this._scanBlockCallback(block);
-      this.currentBlock = parseInt(this.currentBlock, 10) + 1;      
+      this.currentBlock = parseInt(this.currentBlock, 10) + 1;
       logger.debug(`Current block number is ${this.currentBlock}`);
 
       await this.scanBlocks(this.currentBlock);

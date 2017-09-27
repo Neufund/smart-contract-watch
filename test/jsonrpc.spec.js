@@ -1,5 +1,5 @@
 import { expect, assert } from 'chai';
-import { JsonRpc, toPromise } from '../src/jsonrpc';
+import JsonRpc from '../src/jsonrpc';
 import { web3, web3EmptyData } from './web3Mocked.js';
 
 let callbackExecutedCounter = 0

@@ -2,7 +2,7 @@ import logger from './logger';
 import command from './command';
 import web3 from './web3/web3Provider';
 import { decodeInputData, decodeLogData } from './decoder';
-import { JsonRpc } from './jsonrpc';
+import JsonRpc from './jsonrpc';
 import { getABI } from './etherscan';
 import output from './output';
 import { isInArray } from './utils';
