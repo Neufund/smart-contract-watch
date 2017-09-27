@@ -18,7 +18,7 @@ export const web3EmptyData = {
       if (callback) { callback(null, {}); }
     },
     getTransactionReceipt: (transaction, callback) => {
-      if (callback) { callback(null, {}) }
+      if (callback) { callback(null, {}); }
     },
   },
 };

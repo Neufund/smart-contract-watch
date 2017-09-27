@@ -21,7 +21,6 @@ import output from './output';
  * @param {*} transaction 
  */
 const transactionHandler = async (transaction) => {
-  
   let decodedLogs;
   let decodedInputDataResult;
 
