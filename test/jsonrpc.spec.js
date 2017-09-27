@@ -16,6 +16,7 @@ describe('JsonRpc', () => {
     beforeEach(() => {
         blockFrom = 3577505;
         blockTo = 3578800;
+        addresses = ["0xa74476443119A942dE498590Fe1f2454d7D4aC0d"];
         callbackExecutedCounter = 0
     });
 
@@ -26,14 +27,13 @@ describe('JsonRpc', () => {
         expect(callbackExecutedCounter).to.equal(0);
     });
 
-    it('Should have 0 callbackExecutedCounter because block has no transactions', async () => {
-        addresses = ["0xa74476443119A942dE498590Fe1f2454d7D4aC0d"];
+    it('Should have 0 callbackExecutedCounter because block has no transactions', async () => {        
         jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, web3EmptyData, tranactionHandler);
         const r = await jsonRpc.scanBlocks();
         expect(callbackExecutedCounter).to.equal(0);
     });
 
-    it('expectedIterations should equal callbackExecutedCounter', async () => {
+    it('expectedIterations should equal callbackExecutedCounter with multiple addresses', async () => {
         /**
          * Number of all transactions are 20 in each block
          * Number of transactions that have the targeted address is 3        
