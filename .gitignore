@@ -2,5 +2,6 @@ dist/
 node_modules/
 .env
 .node*
-.nyc_output/
 contracts/
+.nyc_output
+coverage/

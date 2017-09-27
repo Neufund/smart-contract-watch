@@ -10,4 +10,5 @@ install:
   - yarn
 script:
   - yarn eslint src
-  - yarn coverage
+  - yarn test
+after_success: yarn coverage
