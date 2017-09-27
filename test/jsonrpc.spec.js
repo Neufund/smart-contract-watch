@@ -16,7 +16,6 @@ describe('JsonRpc', () => {
     beforeEach(() => {
         blockFrom = 3578700;
         blockTo = 3578800;
-        addresses = ["0xa74476443119A942dE498590Fe1f2454d7D4aC0d"];
         callbackExecutedCounter = 0
     });
 
@@ -50,6 +49,7 @@ describe('JsonRpc', () => {
          * Number of all transactions are 20 in each block
          * Number of transactions that have the targeted address is 3        
          */
+        addresses = ["0xa74476443119A942dE498590Fe1f2454d7D4aC0d"];
         const expectedIterations = 3 * (blockTo - blockFrom);
         jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, web3, tranactionHandler);
         const r = await jsonRpc.scanBlocks();
