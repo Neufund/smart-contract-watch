@@ -11,7 +11,8 @@
     "start": "(cp -n .env.example .env || true) & ./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist && node ./dist ",
     "lint": "eslint src",
     "fix": "eslint src --fix",
-    "test": "(cp -n .env.example .env || true) & ./node_modules/mocha/bin/mocha --compilers js:babel-core/register 'test/**/*.spec.js?(x)'"
+    "test": "(cp -n .env.example .env || true) & mocha --compilers js:babel-core/register 'test/**/*.spec.js?(x)'",
+    "coverage": "(cp -n .env.example .env || true) & nyc mocha --compilers js:babel-core/register 'test/**/*.spec.js?(x)'"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -27,6 +28,7 @@
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.3.0",
     "mocha": "^3.5.3",
+    "nyc": "^11.2.1",
     "rimraf": "^2.6.2",
     "sinon": "^4.0.0"
   },
