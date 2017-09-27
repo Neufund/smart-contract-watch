@@ -14,7 +14,7 @@ describe('JsonRpc', () => {
     let addresses;
 
     beforeEach(() => {
-        blockFrom = 3577505;
+        blockFrom = 3578700;
         blockTo = 3578800;
         addresses = ["0xa74476443119A942dE498590Fe1f2454d7D4aC0d"];
         callbackExecutedCounter = 0

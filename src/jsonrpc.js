@@ -89,12 +89,12 @@ export default class JsonRpc {
       this.currentBlock = parseInt(this.currentBlock, 10) + 1;
       logger.debug(`Current block number is ${this.currentBlock}`);
 
-      await this.scanBlocks(this.currentBlock);
+      await this.scanBlocks();
     } catch (e) {
       if (e.message === 'Invalid JSON RPC response: ""') {
         logger.error(`Network error ocurar, retry after ${2000} millisecond, from block number ${this.currentBlock}`);
         bluebird.delay(2000).then(async () => {
-          await this.scanBlocks(this.currentBlock);
+          await this.scanBlocks();
         });
       } else {
         throw new Error(e.message);
