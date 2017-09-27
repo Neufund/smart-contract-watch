@@ -1,15 +1,6 @@
 import bluebird from 'bluebird';
 import logger from './logger';
 import { isInArray } from './utils';
-/**
- * This is promisify function that convert function with callback to promise
- * @param {*} func 
- */
-export const toPromise = func => (...args) =>
-  new Promise((resolve, reject) =>
-    func(...args, (error, result) => (error ? reject(new Error(error.message)) : resolve(result)))
-  );
-
 
 export class JsonRpc {
   /**
@@ -51,7 +42,7 @@ export class JsonRpc {
    * @param string txn
    */
   async _scanTransaction(txn) {
-    const txnReceipts = await toPromise(this.web3Instance.getTransactionReceipt)(txn.hash);
+    const txnReceipts = await bluebird.promisify(this.web3Instance.getTransactionReceipt)(txn.hash);
     const logs = txnReceipts.logs ? txnReceipts.logs.filter(log => isInArray(this.addresses,
       log.address)) : [];
 
@@ -93,9 +84,11 @@ export class JsonRpc {
     }
 
     try {
-      const block = await toPromise(this.web3Instance.getBlock)(this.currentBlock, true);
+      const block = await bluebird.promisify(this.web3Instance.getBlock)(this.currentBlock, true);
       await this._scanBlockCallback(block);
-      this.currentBlock = parseInt(this.currentBlock, 10) + 1;
+      this.currentBlock = parseInt(this.currentBlock, 10) + 1;      
+      logger.debug(`Current block number is ${this.currentBlock}`);
+
       await this.scanBlocks(this.currentBlock);
     } catch (e) {
       if (e.message === 'Invalid JSON RPC response: ""') {
