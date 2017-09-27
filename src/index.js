@@ -16,45 +16,27 @@ import output from './output';
  * 
  */
 
-
 /**
- * This is adapter function that will send the data to the chosen output module
- * @param {*} data 
- */
-const sendToOutput = (data) => {
-  output(data);
-};
-
-/**
- * This function will decode the transaction and the logs that happed inside it,
- * then send them to the out put function 
+ * Decode a transaction and all logs generated from it then send results to output model 
  * @param {*} transaction 
  */
 const transactionHandler = async (transaction) => {
-  /**
-   * Load the ABI object from the memeory
-   */
-
+  
   let decodedLogs;
   let decodedInputDataResult;
+
   try {
-    /**
-     * Pass the input and the ABI object to the decoder
-     */
     decodedInputDataResult = decodeInputData(transaction.input);
   } catch (error) {
     logger.error(error.message);
   }
 
   try {
-    /**
-     * Pass the Logs and the ABI object to the decoder
-     */
     decodedLogs = decodeLogData(transaction.logs);
   } catch (error) {
     logger.error(error.message);
   }
-  sendToOutput({ transaction, decodedInputDataResult, decodedLogs });
+  output({ transaction, decodedInputDataResult, decodedLogs });
 };
 
 /**
@@ -62,7 +44,7 @@ const transactionHandler = async (transaction) => {
  */
 const main = async () => {
   const { from, to, addresses } = command();
-  logger.debug('Start working');
+  logger.debug('Start process');
 
   const promisesArray = addresses.map(address => getABI(address));
 
@@ -75,11 +57,11 @@ const main = async () => {
     await jsonRpc.scanBlocks();
     logger.info('Finish scanning all the blocks');
   } catch (e) {
-    logger.debug(e.stack || e);
+    logger.log('verbose', e.stack || e);
   }
 };
 
 main().catch((e) => {
   logger.error(`"Main catch ${e.message}`);
-  logger.debug(e.stack || e);
+  logger.log('verbose', e.stack || e);
 });
