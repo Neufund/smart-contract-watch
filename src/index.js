@@ -1,11 +1,11 @@
 import logger from './logger';
 import command from './command';
 import web3 from './web3/web3Provider';
-import { decodeInputData, decodeLogData } from './decoder';
+import { decodeInputData, decodeLogData, addABI } from './decoder';
 import JsonRpc from './jsonrpc';
 import { getABI } from './etherscan';
 import output from './output';
-import { isInArray } from './utils';
+
 /**
  * 
  * 1- Get smart contract ABI from etherscan
@@ -16,7 +16,6 @@ import { isInArray } from './utils';
  * 
  */
 
-const addressesABIs = {};
 
 /**
  * This is adapter function that will send the data to the chosen output module
@@ -33,33 +32,8 @@ const sendToOutput = (data) => {
  */
 const transactionHandler = async (transaction) => {
   /**
-   * - Check if the transaction.to address in the list
-   * - Check if the logs address in the list
-   * - If returned should throw Error because its un expected case
-   */ 
-  const definedAddresses = Object.keys(addressesABIs);
-  const transactionToAddress = transaction.to.toLowerCase();
-  let transactionAddress = null;
-
-  if (isInArray(definedAddresses, transactionToAddress)) {
-    transactionAddress = transactionToAddress;
-  } else {
-    transaction.logs.forEach((log) => {
-      if (isInArray(definedAddresses, log.address)) { transactionAddress = log.address; }
-    });
-  }
-
-  // precondition
-  if (!transactionAddress) {
-    logger.debug(Object.keys(addressesABIs));
-    logger.debug(transactionAddress);
-    throw new Error('No address has been matched.');
-  }
-
-  /**
    * Load the ABI object from the memeory
    */
-  const abi = await addressesABIs[transactionAddress];
 
   let decodedLogs;
   let decodedInputDataResult;
@@ -67,7 +41,7 @@ const transactionHandler = async (transaction) => {
     /**
      * Pass the input and the ABI object to the decoder
      */
-    decodedInputDataResult = decodeInputData(transaction.input, abi);
+    decodedInputDataResult = decodeInputData(transaction.input);
   } catch (error) {
     logger.error(error.message);
   }
@@ -75,12 +49,12 @@ const transactionHandler = async (transaction) => {
   try {
     /**
      * Pass the Logs and the ABI object to the decoder
-     */    
-    decodedLogs = decodeLogData(transaction.logs, abi);
+     */
+    decodedLogs = decodeLogData(transaction.logs);
   } catch (error) {
     logger.error(error.message);
   }
-  sendToOutput({ transactionAddress, transaction, decodedInputDataResult, decodedLogs });
+  sendToOutput({ transaction, decodedInputDataResult, decodedLogs });
 };
 
 /**
@@ -90,9 +64,10 @@ const main = async () => {
   const { from, to, addresses } = command();
   logger.debug('Start working');
 
-  addresses.forEach((address) => {
-    addressesABIs[address.toLowerCase()] = getABI(address);
-  });
+  const promisesArray = addresses.map(address => getABI(address));
+
+  const promisifiedABIs = await Promise.all(promisesArray);
+  promisifiedABIs.forEach(abi => addABI(abi));
 
   const jsonRpc = new JsonRpc(addresses, from, to, web3, transactionHandler);
 
