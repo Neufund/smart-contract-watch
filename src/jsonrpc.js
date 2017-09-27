@@ -1,6 +1,6 @@
 import bluebird from 'bluebird';
 import logger from './logger';
-
+import { isInArray } from './utils';
 /**
  * This is promisify function that convert function with callback to promise
  * @param {*} func 
@@ -10,30 +10,27 @@ export const toPromise = func => (...args) =>
     func(...args, (error, result) => (error ? reject(new Error(error.message)) : resolve(result)))
   );
 
-/**
- * @param Array array 
- * @param {*} element 
- */
-export const isInArray = (array, element) => array.indexOf(element) >= 0;
 
 export class JsonRpc {
   /**
    * Initialize class local variables
    * @param Array addresses 
-   * @param int fromBlock 
+   * @param int currentBlock 
    * @param int toBlock 
    * @param function callback 
    */
-  constructor(addresses, fromBlock, toBlock, web3, callback = null) {
+  constructor(addresses, currentBlock, toBlock, web3, callback = null) {
     this.addresses = addresses.map(address => address.toLowerCase());
-    this.fromBlock = fromBlock;
+    this.currentBlock = currentBlock;
     this.toBlock = toBlock;
     this.web3Instance = web3.eth;
     this.callback = callback;
+    if (!callback) {
+      logger.info('Warning!: No callback function defined');
+    }
   }
 
   /**
-   * 
    * This will return the final data structure 
    * for the transaction resopnse
    * @param string tx 
@@ -55,30 +52,27 @@ export class JsonRpc {
    */
   async _scanTransaction(txn) {
     const txnReceipts = await toPromise(this.web3Instance.getTransactionReceipt)(txn.hash);
-    const logs = txnReceipts.logs.filter(log => isInArray(this.addresses, log.address));
+    const logs = txnReceipts.logs ? txnReceipts.logs.filter(log => isInArray(this.addresses,
+      log.address)) : [];
 
-    /**
-     * This case should never happend, because we are cheching 
-     * the smart contract not the normal addresses
-     */
     if (txn.from && isInArray(this.addresses, txn.from.toLowerCase())) {
-      throw new Error('Smart contract is shouldn\'t be in from');
+      throw new Error('The address you entered is not a smart contract');
     }
 
     // If the smart contract recieved transaction or there's logs execute the callback function 
     if ((txn.to && isInArray(this.addresses, txn.to.toLowerCase())) || logs.length > 0) {
       const transactionResult = JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
-      if (this.callback) { this.callback(transactionResult); }
+      if (this.callback) { await this.callback(transactionResult); }
     }
   }
 
   /**
    * This function handles the transactions that exist in one block
    *  and puts them into an array of promises, then executes them.
-   * @param object block 
+   * @param Object block 
    */
   async _scanBlockCallback(block) {
-    if (block.transactions) {
+    if (block && block.transactions && Array.isArray(block.transactions)) {
       const promises = [];
       for (let i = 0; i < block.transactions.length; i += 1) {
         const txn = block.transactions[i];
@@ -93,21 +87,21 @@ export class JsonRpc {
    * The main function that run scan all the blocks.
    */
   async scanBlocks() {
-    if (this.fromBlock >= this.toBlock) {
-      logger.debug(`Last block number is ${this.fromBlock}`);
+    if (this.currentBlock >= this.toBlock) {
+      logger.debug(`Last block number is ${this.currentBlock}`);
       return;
     }
 
     try {
-      const block = await toPromise(this.web3Instance.getBlock)(this.fromBlock, true);
+      const block = await toPromise(this.web3Instance.getBlock)(this.currentBlock, true);
       await this._scanBlockCallback(block);
-      this.fromBlock = parseInt(this.fromBlock, 10) + 1;
-      await this.scanBlocks(this.fromBlock);
+      this.currentBlock = parseInt(this.currentBlock, 10) + 1;
+      await this.scanBlocks(this.currentBlock);
     } catch (e) {
       if (e.message === 'Invalid JSON RPC response: ""') {
-        logger.error(`Network error ocurar, retry after ${2000} millisecond, from block number ${this.fromBlock}`);
+        logger.error(`Network error ocurar, retry after ${2000} millisecond, from block number ${this.currentBlock}`);
         bluebird.delay(2000).then(async () => {
-          await this.scanBlocks(this.fromBlock);
+          await this.scanBlocks(this.currentBlock);
         });
       } else {
         throw new Error(e.message);

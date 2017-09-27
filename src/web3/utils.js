@@ -11,4 +11,4 @@ export const isAddress = address => web3Instance.isAddress(address);
  * @param blockNumber
  */
 export const isValidBlockNumber = blockNumber => !isNaN(blockNumber)
-&& web3Instance.eth.blockNumber > blockNumber;
+&& web3Instance.eth.blockNumber >= blockNumber;
