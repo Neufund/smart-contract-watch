@@ -87,7 +87,6 @@ export default class JsonRpc {
     validateBlockNumber(lastBlockNumber, this.currentBlock);
     validateBlockNumber(lastBlockNumber, this.toBlock);
 
-    /* eslint-disable */
     while (this.currentBlock <= this.toBlock) {
       try {
         const block = await bluebird.promisify(this.web3Instance.getBlock)(this.currentBlock, true);
@@ -103,6 +102,5 @@ export default class JsonRpc {
         }
       }
     }
-    /* eslint-enable */     
   }
 }
