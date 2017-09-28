@@ -1,11 +1,5 @@
 import program from 'commander';
-import { isAddress } from './web3/utils';
-/**
- * this function check if block number is correct
- * @param blockNumber
- */
-const isBlockNumber = blockNumber => !isNaN(blockNumber);
-
+import { isAddress, isValidBlockNumber } from './web3/utils';
 
 /**
  * convert string to array
@@ -32,9 +26,14 @@ export default () => {
     if (!isAddress(address)) { throw new Error(`${address} is not valid address`); }
   });
 
-  if (!isBlockNumber(program.from)) { throw new Error(`${program.from} is not valid block number`); }
+  if (!isValidBlockNumber(program.from)) { throw new Error(`${program.from} is not valid block number`); }
 
-  if (!isBlockNumber(program.to)) { throw new Error(`${program.to} is not valid block number`); }
+  if (!isValidBlockNumber(program.to)) { throw new Error(`${program.to} is not valid block number`); }
+
+  if (program.from > program.to) {
+    throw new Error(`From "${program.from}" shouldn't
+     be larger than "${program.from}"`);
+  }
 
   return program;
 };

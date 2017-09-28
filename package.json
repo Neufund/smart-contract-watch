@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "abi-decoder": "^1.0.8",
+    "bluebird": "^3.5.0",
     "commander": "^2.11.0",
     "dotenv": "^4.0.0",
     "request": "^2.82.0",

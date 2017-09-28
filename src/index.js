@@ -1,8 +1,8 @@
 import logger from './logger';
 import command from './command';
-import web3 from './web3/web3Provider';
-import { decodeInputData, decodeLog } from './decoder';
-import { JsonRpc } from './jsonrpc';
+import { decodeInputData, decodeLogData, addABI } from './decoder';
+import JsonRpc from './jsonrpc';
+import { getABI } from './etherscan';
 import output from './output';
 
 /**
@@ -15,28 +15,26 @@ import output from './output';
  * 
  */
 
-
 /**
- * This is adapter function that will send the data to the chosen output module
- * @param {*} data 
- */
-const sendToOutput = (...data) => {
-  output(data);
-};
-
-/**
- * This function will decode the transaction and the logs that happed inside it,
- * then send them to the out put function 
+ * Decode a transaction and all logs generated from it then send results to output model 
  * @param {*} transaction 
- * @param {*} logs 
  */
-const transactionHandler = (transaction) => {
-  const decodedInputDataResult = decodeInputData(transaction); // eslint-disable-line
+const transactionHandler = async (transaction) => {
   let decodedLogs;
-  if (transaction.logs.length > 0) {
-    decodedLogs = transaction.logs.map(log => decodeLog(log)) // eslint-disable-line
+  let decodedInputDataResult;
+
+  try {
+    decodedInputDataResult = decodeInputData(transaction.input);
+  } catch (error) {
+    logger.error(error.message);
   }
-  sendToOutput(decodedInputDataResult, decodedLogs);
+
+  try {
+    decodedLogs = decodeLogData(transaction.logs);
+  } catch (error) {
+    logger.error(error.message);
+  }
+  output({ transaction, decodedInputDataResult, decodedLogs });
 };
 
 /**
@@ -44,17 +42,24 @@ const transactionHandler = (transaction) => {
  */
 const main = async () => {
   const { from, to, addresses } = command();
-  logger.debug('Start working');
-  const jsonRpc = new JsonRpc(addresses, from, to, web3, transactionHandler);
-  jsonRpc.scanBlocks().then(
-    () =>
-      logger.info('Finish scanning all the blocks')
-  ).catch(
-    (e) => {
-      throw new Error(e);
-    });
+  logger.debug('Start process');
+
+  const promisesArray = addresses.map(address => getABI(address));
+
+  const promisifiedABIs = await Promise.all(promisesArray);
+  promisifiedABIs.forEach(abi => addABI(abi));
+
+  try {
+    const jsonRpc = new JsonRpc(addresses, from, to, transactionHandler);
+
+    await jsonRpc.scanBlocks();
+    logger.info('Finish scanning all the blocks');
+  } catch (e) {
+    logger.log('verbose', e.stack || e);
+  }
 };
 
 main().catch((e) => {
-  logger.error(e.message);
+  logger.error(`"Main catch ${e.message}`);
+  logger.log('verbose', e.stack || e);
 });
