@@ -1,6 +1,5 @@
 import logger from './logger';
 import command from './command';
-import web3 from './web3/web3Provider';
 import { decodeInputData, decodeLogData, addABI } from './decoder';
 import JsonRpc from './jsonrpc';
 import { getABI } from './etherscan';
@@ -50,9 +49,9 @@ const main = async () => {
   const promisifiedABIs = await Promise.all(promisesArray);
   promisifiedABIs.forEach(abi => addABI(abi));
 
-  const jsonRpc = new JsonRpc(addresses, from, to, web3, transactionHandler);
-
   try {
+    const jsonRpc = new JsonRpc(addresses, from, to, transactionHandler);
+
     await jsonRpc.scanBlocks();
     logger.info('Finish scanning all the blocks');
   } catch (e) {

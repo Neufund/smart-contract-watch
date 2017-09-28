@@ -1,6 +1,8 @@
 import bluebird from 'bluebird';
+import web3 from './web3/web3Provider';
 import logger from './logger';
 import { isInArray } from './utils';
+import { isAddress, validateBlockNumber } from './web3/utils';
 
 export default class JsonRpc {
   /**
@@ -10,9 +12,13 @@ export default class JsonRpc {
    * @param int toBlock 
    * @param function callback 
    */
-  constructor(addresses, currentBlock, toBlock, web3, callback = null) {
-    this.addresses = addresses.map(address => address.toLowerCase());
-    this.currentBlock = currentBlock;
+  constructor(addresses, fromBlock, toBlock, callback = null) {
+    this.addresses = addresses.map((address) => {
+      if (!isAddress(address)) { throw new Error(`${address} is not valid address`); }
+      return address.toLowerCase();
+    });
+
+    this.currentBlock = fromBlock;
     this.toBlock = toBlock;
     this.web3Instance = web3.eth;
     this.callback = callback;
@@ -47,7 +53,7 @@ export default class JsonRpc {
       log.address)) : [];
 
     if (txn.from && isInArray(this.addresses, txn.from.toLowerCase())) {
-      throw new Error('The address you entered is not a smart contract');
+      throw new Error('Address you entered is not a smart contract');
     }
 
     // If the smart contract recieved transaction or there's logs execute the callback function 
@@ -73,32 +79,30 @@ export default class JsonRpc {
     }
   }
 
-
   /**
    * The main function that run scan all the blocks.
-   */
+   */    
   async scanBlocks() {
-    if (this.currentBlock >= this.toBlock) {
-      logger.debug(`Last block number is ${this.currentBlock}`);
-      return;
-    }
+    const lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
+    validateBlockNumber(lastBlockNumber, this.currentBlock);
+    validateBlockNumber(lastBlockNumber, this.toBlock);
 
-    try {
-      const block = await bluebird.promisify(this.web3Instance.getBlock)(this.currentBlock, true);
-      await this._scanBlockCallback(block);
-      this.currentBlock = parseInt(this.currentBlock, 10) + 1;
-      logger.debug(`Current block number is ${this.currentBlock}`);
-
-      await this.scanBlocks();
-    } catch (e) {
-      if (e.message === 'Invalid JSON RPC response: ""') {
-        logger.error(`Network error ocurar, retry after ${2000} millisecond, from block number ${this.currentBlock}`);
-        bluebird.delay(2000).then(async () => {
-          await this.scanBlocks();
-        });
-      } else {
-        throw new Error(e.message);
+    /* eslint-disable */
+    while (this.currentBlock <= this.toBlock) {
+      try {
+        const block = await bluebird.promisify(this.web3Instance.getBlock)(this.currentBlock, true);
+        await this._scanBlockCallback(block);
+        this.currentBlock = parseInt(this.currentBlock, 10) + 1;
+        logger.debug(`Current block number is ${this.currentBlock}`);
+      } catch (e) {
+        if (e.message === 'Invalid JSON RPC response: ""') {
+          logger.error(`Network error ocurar, retry after ${2000} millisecond, from block number ${this.currentBlock}`);
+          await bluebird.delay(2000);
+        } else {
+          throw new Error(e.message);
+        }
       }
     }
+    /* eslint-enable */     
   }
 }
