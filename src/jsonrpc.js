@@ -83,29 +83,30 @@ export default class JsonRpc {
    * The main function that run scan all the blocks.
    */
   async scanBlocks() {
-    let lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();    
+    let lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
     validateBlockNumber(lastBlockNumber, this.currentBlock);
     if (this.toBlock) {
       validateBlockNumber(lastBlockNumber, this.toBlock);
     }
 
-    while ((this.toBlock && this.toBlock >= this.currentBlock) || (this.toBlock == null) ) {
+    while ((this.toBlock && this.toBlock >= this.currentBlock) || (this.toBlock == null)) {
       try {
-        if(this.currentBlock > lastBlockNumber) {
-          logger.info(`Waiting 10 seconds until the incoming blocks`);
+        if (this.currentBlock > lastBlockNumber) {
+          logger.info('Waiting 10 seconds until the incoming blocks');
           await bluebird.delay(10000);
           lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
-          continue;
+        } else {
+          const block = await bluebird.promisify(this.web3Instance.getBlock)(
+            this.currentBlock, true);
+          await this._scanBlockCallback(block);
+
+          this.currentBlock = parseInt(this.currentBlock, 10) + 1;
+          logger.debug(`Current block number is ${this.currentBlock}`);
         }
-        const block = await bluebird.promisify(this.web3Instance.getBlock)(this.currentBlock, true);
-        await this._scanBlockCallback(block);
-
-        this.currentBlock = parseInt(this.currentBlock, 10) + 1;
-        logger.debug(`Current block number is ${this.currentBlock}`);
-
       } catch (e) {
         if (e.message === 'Invalid JSON RPC response: ""') {
-          logger.error(`Network error ocurar, retry after 2 seconds, from block number ${this.currentBlock}`);
+          logger.error(`Network error ocurar, retry after 2 seconds, from block number 
+          ${this.currentBlock}`);
           await bluebird.delay(2000);
         } else {
           throw new Error(e.message);
