@@ -1,4 +1,5 @@
 import bluebird from 'bluebird';
+import { defaultBlockNumber, defaultFromBlockNumber } from './config';
 import web3 from './web3/web3Provider';
 import logger from './logger';
 import { isInArray } from './utils';
@@ -18,8 +19,8 @@ export default class JsonRpc {
       return address.toLowerCase();
     });
 
-    this.currentBlock = fromBlock > 0 ? fromBlock : 0;
-    this.toBlock = toBlock > 0 ? toBlock : null;
+    this.currentBlock = fromBlock !== defaultBlockNumber ? fromBlock : defaultFromBlockNumber;
+    this.toBlock = toBlock !== defaultBlockNumber ? toBlock : null;
     this.web3Instance = web3.eth;
     this.callback = callback;
     if (!callback) {
@@ -105,8 +106,8 @@ export default class JsonRpc {
         }
       } catch (e) {
         if (e.message === 'Invalid JSON RPC response: ""') {
-          logger.error(`Network error ocurar, retry after 2 seconds, from block number 
-          ${this.currentBlock}`);
+          logger.error(`Network error ocurar, retry after 2 seconds, from block number \
+${this.currentBlock}`);
           await bluebird.delay(2000);
         } else {
           throw new Error(e.message);
