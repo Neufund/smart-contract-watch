@@ -30,8 +30,7 @@ export default () => {
 
   if (program.to !== defaultBlockNumber && !isValidBlockNumber(program.to)) { throw new Error(`${program.to} is not valid block number`); }
 
-  if ((program.from !== defaultBlockNumber && program.to !== defaultBlockNumber)
-    && program.from > program.to) {
+  if (program.to !== defaultBlockNumber && program.from > program.to) {
     throw new Error(`From "${program.from}" shouldn't
      be larger than "${program.from}"`);
   }
