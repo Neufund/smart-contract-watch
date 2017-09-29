@@ -1,4 +1,5 @@
 import bluebird from 'bluebird';
+import { defaultBlockNumber, defaultFromBlockNumber } from './config';
 import web3 from './web3/web3Provider';
 import logger from './logger';
 import { isInArray } from './utils';
@@ -18,8 +19,8 @@ export default class JsonRpc {
       return address.toLowerCase();
     });
 
-    this.currentBlock = fromBlock;
-    this.toBlock = toBlock;
+    this.currentBlock = fromBlock !== defaultBlockNumber ? fromBlock : defaultFromBlockNumber;
+    this.toBlock = toBlock !== defaultBlockNumber ? toBlock : null;
     this.web3Instance = web3.eth;
     this.callback = callback;
     if (!callback) {
@@ -81,21 +82,32 @@ export default class JsonRpc {
 
   /**
    * The main function that run scan all the blocks.
-   */    
+   */
   async scanBlocks() {
-    const lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
+    let lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
     validateBlockNumber(lastBlockNumber, this.currentBlock);
-    validateBlockNumber(lastBlockNumber, this.toBlock);
+    if (this.toBlock) {
+      validateBlockNumber(lastBlockNumber, this.toBlock);
+    }
 
-    while (this.currentBlock <= this.toBlock) {
+    while ((this.toBlock && this.toBlock >= this.currentBlock) || (this.toBlock == null)) {
       try {
-        const block = await bluebird.promisify(this.web3Instance.getBlock)(this.currentBlock, true);
-        await this._scanBlockCallback(block);
-        this.currentBlock = parseInt(this.currentBlock, 10) + 1;
-        logger.debug(`Current block number is ${this.currentBlock}`);
+        if (this.currentBlock > lastBlockNumber) {
+          logger.info('Waiting 10 seconds until the incoming blocks');
+          await bluebird.delay(10000);
+          lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
+        } else {
+          const block = await bluebird.promisify(this.web3Instance.getBlock)(
+            this.currentBlock, true);
+          await this._scanBlockCallback(block);
+
+          this.currentBlock = parseInt(this.currentBlock, 10) + 1;
+          logger.debug(`Current block number is ${this.currentBlock}`);
+        }
       } catch (e) {
         if (e.message === 'Invalid JSON RPC response: ""') {
-          logger.error(`Network error ocurar, retry after ${2000} millisecond, from block number ${this.currentBlock}`);
+          logger.error(`Network error ocurar, retry after 2 seconds, from block number \
+${this.currentBlock}`);
           await bluebird.delay(2000);
         } else {
           throw new Error(e.message);

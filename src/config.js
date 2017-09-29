@@ -13,3 +13,7 @@ export const getLogLevel = () => process.env.LOG_LEVEL;
 export const getRPCNode = () => process.env.RPC_URL;
 
 export const getAccessToken = () => process.env.ACCESS_TOKEN;
+
+export const defaultBlockNumber = -1;
+
+export const defaultFromBlockNumber = 0;
