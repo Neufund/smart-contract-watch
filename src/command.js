@@ -1,4 +1,5 @@
 import program from 'commander';
+import fs from 'fs';
 import { defaultBlockNumber } from './config';
 import { isAddress, isValidBlockNumber } from './web3/utils';
 
@@ -14,26 +15,45 @@ export default () => {
     .version('0.1.0')
     .option('-a, --addresses <n>', 'List of address', list)
     .option('-f, --from [n]', 'From block', defaultBlockNumber)
-    .option('-t, --to [n]', 'To block', defaultBlockNumber);
+    .option('-t, --to [n]', 'To block', defaultBlockNumber)
+    .option('-c, --config [s]', 'config file', '');
 
   program.parse(process.argv);
+  let addresses = null;
+  let from = null;
+  let to = null;
 
-  if (!program.addresses) { throw new Error('-a or --address is required'); }
-  if (!program.from) { throw new Error('-f or --from is required'); }
-  if (!program.to) { throw new Error('-t or --to is required'); }
+  if (program.config) {
+    if (fs.existsSync(program.config)) {
+      const configFileData = JSON.parse(fs.readFileSync(program.config, { encoding: 'utf8' }));
+      addresses = configFileData.addresses;
+      from = configFileData.from || defaultBlockNumber;
+      to = configFileData.to || defaultBlockNumber;
+    } else {
+      throw new Error(`No file exists ${program.config}`);
+    }
+  } else {
+    addresses = program.addresses;
+    from = program.from;
+    to = program.to;
+  }
 
-  program.addresses.forEach((address) => {
+  if (!addresses) { throw new Error('-a or --address is required'); }
+  if (!from) { throw new Error('-f or --from is required'); }
+  if (!to) { throw new Error('-t or --to is required'); }
+
+  addresses.forEach((address) => {
     if (!isAddress(address)) { throw new Error(`${address} is not valid address`); }
   });
 
-  if (program.from !== defaultBlockNumber && !isValidBlockNumber(program.from)) { throw new Error(`${program.from} is not valid block number`); }
+  if (from !== defaultBlockNumber && !isValidBlockNumber(from)) { throw new Error(`${from} is not valid block number`); }
 
-  if (program.to !== defaultBlockNumber && !isValidBlockNumber(program.to)) { throw new Error(`${program.to} is not valid block number`); }
+  if (to !== defaultBlockNumber && !isValidBlockNumber(to)) { throw new Error(`${to} is not valid block number`); }
 
-  if (program.to !== defaultBlockNumber && program.from > program.to) {
-    throw new Error(`From "${program.from}" shouldn't
-     be larger than "${program.from}"`);
+  if (to !== defaultBlockNumber && from > to) {
+    throw new Error(`From "${from}" shouldn't
+     be larger than "${from}"`);
   }
 
-  return program;
+  return { from, to, addresses };
 };
