@@ -1,8 +1,14 @@
 import consensysDecode from 'abi-decoder';
+import { isAddress } from './web3/utils';
 
+const decodedAddressList = [];
 
-export const addABI = (abi) => {
+export const getDecodedAddresses = () => decodedAddressList;
+
+export const addABI = (abi, address) => {
+  if (!isAddress(address)) throw new Error('Input is not an address');
   if (!abi) throw new Error('can\'t add undefined/null ABI');
+  decodedAddressList.push(address);
   consensysDecode.addABI(abi);
 };
 
@@ -14,13 +20,15 @@ export const addABI = (abi) => {
  *
  */
 
-export const decodeInputData = (inputData) => {
+export const decodeInputData = (inputData, address) => {
   if (!consensysDecode.getABIs().length) throw new Error('No ABIs added to system');
-  if (inputData !== undefined) {
-    const decodedData = consensysDecode.decodeMethod(inputData);
-    if (decodedData === undefined) { throw new Error('Problem with input data'); } else return decodedData;
+  if (!inputData || !isAddress(address)) throw new Error('decodedData or address are undefined/invalid');
+  const decodedData = consensysDecode.decodeMethod(inputData);
+  if (!decodedData) {
+    if (decodedAddressList.filter(currentAddress => currentAddress === address).length) throw new Error('problem during decoding');
+    return inputData;
   }
-  throw new Error('Problem with input data check if data is sent correctly');
+  return decodedData;
 };
 
 /**
@@ -31,11 +39,13 @@ export const decodeInputData = (inputData) => {
  *
  */
 
-export const decodeLogData = (logData) => {
+export const decodeLogData = (logData, address) => {
   if (!consensysDecode.getABIs().length) throw new Error('No ABIs added to system');
-  if (logData !== undefined) {
-    const decodedlogs = consensysDecode.decodeLogs(logData);
-    if (decodedlogs === undefined) { throw new Error('Problem with transaction Decodedlogs'); } else return decodedlogs;
+  if (!logData || !isAddress(address)) throw new Error('logData or address are undefined');
+  const decodedlogs = consensysDecode.decodeLogs(logData);
+  if (!decodedlogs[0]) {
+    if (decodedAddressList.filter(currentAddress => currentAddress === address).length) throw new Error('Problem with log data decoding');
+    return logData;
   }
-  throw new Error('Problem with transaction Decodedlogs as input');
+  return decodedlogs;
 };
