@@ -10,6 +10,7 @@ import { isAddress, isValidBlockNumber } from './web3/utils';
  */
 const list = val => val.split(',');
 
+
 export default () => {
   program
     .version('0.1.0')
@@ -19,6 +20,7 @@ export default () => {
     .option('-c, --config [s]', 'config file', '');
 
   program.parse(process.argv);
+
   let addresses = null;
   let from = null;
   let to = null;
@@ -52,7 +54,7 @@ export default () => {
 
   if (to !== defaultBlockNumber && from > to) {
     throw new Error(`From "${from}" shouldn't
-     be larger than "${from}"`);
+     be larger than "${to}"`);
   }
 
   return { from, to, addresses };
