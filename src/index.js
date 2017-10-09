@@ -1,9 +1,12 @@
+import bluebird from 'bluebird';
+import web3 from './web3/web3Provider';
 import logger from './logger';
 import command from './command';
 import { decodeInputData, decodeLogData, addABI } from './decoder';
 import JsonRpc from './jsonrpc';
 import { getABI } from './etherscan';
 import output from './output';
+import { getWatchingConfigPath } from './config';
 
 /**
  * 
@@ -41,7 +44,9 @@ const transactionHandler = async (transaction) => {
  * The main function that has the full steps
  */
 const main = async () => {
-  const { from, to, addresses } = command();
+  const lastBlockNumber = await bluebird.promisify(web3.eth.getBlockNumber)();
+
+  const { from, to, addresses } = command(getWatchingConfigPath(), lastBlockNumber);
   logger.debug('Start process');
 
   const promisesArray = addresses.map(address => getABI(address));

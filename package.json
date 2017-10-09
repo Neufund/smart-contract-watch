@@ -30,9 +30,9 @@
     "eslint-plugin-react": "^7.3.0",
     "mocha": "^3.5.3",
     "nyc": "^11.2.1",
+    "rewire": "^2.5.2",
     "rimraf": "^2.6.2",
-    "sinon": "^4.0.0",
-    "rewire": "^2.5.2"
+    "sinon": "^4.0.0"
   },
   "dependencies": {
     "abi-decoder": "^1.0.8",
@@ -40,10 +40,11 @@
     "commander": "^2.11.0",
     "dotenv": "^4.0.0",
     "request": "^2.82.0",
-    "request-promise": "^4.2.1",    
+    "request-promise": "^4.2.1",
     "socket.io": "^2.0.3",
     "socket.io-client": "^2.0.3",
     "web3": "0.19.0",
-    "winston": "2.3.1"
+    "winston": "2.3.1",
+    "yamljs": "^0.3.0"
   }
 }
