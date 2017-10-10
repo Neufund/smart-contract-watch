@@ -2,11 +2,10 @@ import consensysDecode from 'abi-decoder';
 import { isAddress } from './web3/utils';
 
 const decodedAddressList = [];
+
 /**
  * Return added ABI addresses
- *
- * @return []
- *
+ * @return Array
  */
 export const getDecodedAddresses = () => decodedAddressList;
 
@@ -16,7 +15,6 @@ export const getDecodedAddresses = () => decodedAddressList;
  * @param Object abi
  * @param string address
  * @return Object
- *
  */
 export const addABI = (abi, address) => {
   if (!isAddress(address)) throw new Error('Input is not an address');
@@ -30,10 +28,10 @@ export const addABI = (abi, address) => {
  *
  * @param Object inputData
  * @return Object
- *
  */
 export const decodeInputData = (inputData, address) => {
   if (!consensysDecode.getABIs().length) throw new Error('No ABIs added to system');
+  if (inputData === '0x') return ''; // no need for decoding if inputData is empty
   if (!inputData || !isAddress(address)) throw new Error('decodedData or address are undefined/invalid');
   const decodedData = consensysDecode.decodeMethod(inputData);
   if (!decodedData) {
@@ -48,7 +46,6 @@ export const decodeInputData = (inputData, address) => {
  * in the ledger
  * @param Object log
  * @return Object
- *
  */
 export const decodeLogData = (logData, address) => {
   if (!consensysDecode.getABIs().length) throw new Error('No ABIs added to system');
@@ -56,7 +53,7 @@ export const decodeLogData = (logData, address) => {
   const decodedlogs = consensysDecode.decodeLogs(logData);
   // decodeLogs logs always returns an array regardless if it was succssefful or not
   // for example [undefined] in case of failer and [Object] if succssess
-  if (!decodedlogs[0]) {
+  if (decodedlogs.length && !decodedlogs[0]) {
     if (decodedAddressList.filter(currentAddress => currentAddress === address).length) throw new Error('Problem with log data decoding');
     return logData;
   }

@@ -44,6 +44,11 @@ describe('Decoder Module', () => {
       const decodedInput = decodeInputData(dataSample1, nonAddedABIaddress);
       expect(decodedInput).to.deep.equal('0000000000000000000000000c53fe380aba335d144b6f0dbc6b588633f783d7000000000000000000000000f3a85b1c8818629e52d61');
     });
+    it('should return an empty string if inputData was empty', () => {
+      const dataSample1 = '0x';
+      const decodedInput = decodeInputData(dataSample1, nonAddedABIaddress);
+      expect(decodedInput).to.deep.equal('');
+    });
     it('should throw if there was an error during decoding', () => {
       const dataSampleErr = 'a58a4e262b6ead9eb4';
       expect(() => decodeInputData(dataSampleErr, esopAddress)).to.throw('problem during decoding');
