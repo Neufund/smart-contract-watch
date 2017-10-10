@@ -56,7 +56,7 @@ export const decodeLogData = (logData, address) => {
   const decodedlogs = consensysDecode.decodeLogs(logData);
   // decodeLogs logs always returns an array regardless if it was succssefful or not
   // for example [undefined] in case of failer and [Object] if succssess
-  if (!decodedlogs[0]) {
+  if (decodedlogs.length && !decodedlogs[0]) {
     if (decodedAddressList.filter(currentAddress => currentAddress === address).length) throw new Error('Problem with log data decoding');
     return logData;
   }
