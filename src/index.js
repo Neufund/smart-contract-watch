@@ -6,31 +6,31 @@ import { getABI } from './etherscan';
 import output from './output';
 
 /**
- * 
+ *
  * 1- Get smart contract ABI from etherscan
  * 2- Store smart contract ABI locally
  * 3- Get transactions from ledger
  * 4- Decode transactions/logs asynchronously
  * 5- Send final data into output module
- * 
+ *
  */
 
 /**
- * Decode a transaction and all logs generated from it then send results to output model 
- * @param {*} transaction 
+ * Decode a transaction and all logs generated from it then send results to output model
+ * @param {*} transaction
  */
 const transactionHandler = async (transaction) => {
   let decodedLogs;
   let decodedInputDataResult;
 
   try {
-    decodedInputDataResult = decodeInputData(transaction.input, transaction.to);
+    decodedInputDataResult = decodeInputData(transaction.input);
   } catch (error) {
     logger.error(`txHash: ${transaction.hash} ${error.message}`);
   }
 
   try {
-    decodedLogs = decodeLogData(transaction.logs, transaction.to);
+    decodedLogs = decodeLogData(transaction.logs);
   } catch (error) {
     logger.error(`txHash: ${transaction.hash} ${error.message}`);
   }

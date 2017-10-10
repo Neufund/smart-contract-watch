@@ -41,25 +41,16 @@ describe('Decoder Module', () => {
     });
     it('should return encoded if the ABI for this specific address is not added', () => {
       const dataSample1 = '0000000000000000000000000c53fe380aba335d144b6f0dbc6b588633f783d7000000000000000000000000f3a85b1c8818629e52d61';
-      const decodedInput = decodeInputData(dataSample1, nonAddedABIaddress);
-      expect(decodedInput).to.deep.equal('0000000000000000000000000c53fe380aba335d144b6f0dbc6b588633f783d7000000000000000000000000f3a85b1c8818629e52d61');
+      const decodedInput = decodeInputData(dataSample1);
+      expect(decodedInput).to.deep.equal({ name: 'UNDECODED', params: [{ name: 'rawData', value: '0000000000000000000000000c53fe380aba335d144b6f0dbc6b588633f783d7000000000000000000000000f3a85b1c8818629e52d61', type: 'data' }] });
     });
     it('should return an empty string if inputData was empty', () => {
       const dataSample1 = '0x';
       const decodedInput = decodeInputData(dataSample1, nonAddedABIaddress);
       expect(decodedInput).to.deep.equal('');
     });
-    it('should throw if there was an error during decoding', () => {
-      const dataSampleErr = 'a58a4e262b6ead9eb4';
-      expect(() => decodeInputData(dataSampleErr, esopAddress)).to.throw('problem during decoding');
-    });
     it('should throw if address/data is not sent', () => {
-      const dataSampleErr = 'a58a4e262b6ead9eb4';
-      expect(() => decodeInputData(dataSampleErr)).to.throw('decodedData or address are undefined');
-    });
-    it('should throw if address was an invalid address', () => {
-      const dataSampleErr = 'a58a4e262b6ead9eb4';
-      expect(() => decodeInputData(dataSampleErr, invalidAddress)).to.throw('decodedData or address are undefined');
+      expect(() => decodeInputData(undefined)).to.throw('decodedData is undefined/invalid');
     });
   });
   describe('decodeLogData', () => {
@@ -87,21 +78,15 @@ describe('Decoder Module', () => {
       ],
       address: esopAddress }];
     it('should return decoded logs and its params from a transaction', () => {
-      const decodedInput = decodeLogData(testLogs, esopAddress);
+      const decodedInput = decodeLogData(testLogs);
       expect(decodedInput).to.deep.equal(esopEvent);
     });
     it('should return encoded if the ABI for this specific address is not added', () => {
-      const decodedInput = decodeLogData(errTestLogs, nonAddedABIaddress);
-      expect(decodedInput).to.deep.equal(errTestLogs);
-    });
-    it('should throw if there was an error during decoding', () => {
-      expect(() => decodeLogData(errTestLogs, esopAddress)).to.throw('Problem with log data decoding');
+      const decodedInput = decodeLogData(errTestLogs);
+      expect(decodedInput).to.deep.equal({ name: 'UNDECODED', events: [{ name: 'rawLogs', value: errTestLogs, type: 'logs' }] });
     });
     it('should throw if address/data is not sent', () => {
-      expect(() => decodeLogData(testLogs)).to.throw('logData or address are undefined');
-    });
-    it('should throw if address was an invalid address', () => {
-      expect(() => decodeLogData(testLogs, invalidAddress)).to.throw('logData or address are undefined');
+      expect(() => decodeLogData(undefined)).to.throw('logData is undefined/invalid');
     });
   });
 });
