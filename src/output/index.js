@@ -3,13 +3,15 @@ import logger from '../logger';
 export default (data) => {
   const txHash = data.transaction.hash;
   let functionName = '';
-  let functionParams;
+  let functionParams = '';
   let eventText = '';
   let extraMessage = '';
   if (data.decodedInputDataResult) {
     functionName = data.decodedInputDataResult.name;
-    functionParams = data.decodedInputDataResult.params.map(param =>
-      `${param.name}=${param.value}`);
+    if (data.decodedInputDataResult.params) {
+      functionParams = data.decodedInputDataResult.params.map(param =>
+        `${param.name}=${param.value}`);
+    }
   }
 
   if (data.decodedLogs) {

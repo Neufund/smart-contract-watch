@@ -3,8 +3,19 @@ import { isAddress } from './web3/utils';
 
 const decodedAddressList = [];
 
+/**
+ * Return added ABI addresses
+ * @return Array
+ */
 export const getDecodedAddresses = () => decodedAddressList;
 
+/**
+ * Add ABI for Decoding system
+ *
+ * @param Object abi
+ * @param string address
+ * @return Object
+ */
 export const addABI = (abi, address) => {
   if (!isAddress(address)) throw new Error('Input is not an address');
   if (!abi) throw new Error('can\'t add undefined/null ABI');
@@ -17,9 +28,7 @@ export const addABI = (abi, address) => {
  *
  * @param Object inputData
  * @return Object
- *
  */
-
 export const decodeInputData = (inputData, address) => {
   if (!consensysDecode.getABIs().length) throw new Error('No ABIs added to system');
   if (!inputData || !isAddress(address)) throw new Error('decodedData or address are undefined/invalid');
@@ -36,14 +45,14 @@ export const decodeInputData = (inputData, address) => {
  * in the ledger
  * @param Object log
  * @return Object
- *
  */
-
 export const decodeLogData = (logData, address) => {
   if (!consensysDecode.getABIs().length) throw new Error('No ABIs added to system');
   if (!logData || !isAddress(address)) throw new Error('logData or address are undefined');
   const decodedlogs = consensysDecode.decodeLogs(logData);
-  if (!decodedlogs[0]) {
+  // decodeLogs logs always returns an array regardless if it was succssefful or not
+  // for example [undefined] in case of failer and [Object] if succssess
+  if (decodedlogs.length && !decodedlogs[0]) {
     if (decodedAddressList.filter(currentAddress => currentAddress === address).length) throw new Error('Problem with log data decoding');
     return logData;
   }

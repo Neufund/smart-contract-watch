@@ -24,15 +24,15 @@ const transactionHandler = async (transaction) => {
   let decodedInputDataResult;
 
   try {
-    decodedInputDataResult = decodeInputData(transaction.input);
+    decodedInputDataResult = decodeInputData(transaction.input, transaction.to);
   } catch (error) {
-    logger.error(error.message);
+    logger.error(`txHash: ${transaction.hash} ${error.message}`);
   }
 
   try {
-    decodedLogs = decodeLogData(transaction.logs);
+    decodedLogs = decodeLogData(transaction.logs, transaction.to);
   } catch (error) {
-    logger.error(error.message);
+    logger.error(`txHash: ${transaction.hash} ${error.message}`);
   }
   output({ transaction, decodedInputDataResult, decodedLogs });
 };
@@ -47,7 +47,9 @@ const main = async () => {
   const promisesArray = addresses.map(address => getABI(address));
 
   const promisifiedABIs = await Promise.all(promisesArray);
-  promisifiedABIs.forEach(abi => addABI(abi));
+  promisifiedABIs.forEach((abi, index) => {
+    addABI(abi, addresses[index]);
+  });
 
   try {
     const jsonRpc = new JsonRpc(addresses, from, to, transactionHandler);
