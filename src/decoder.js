@@ -31,6 +31,7 @@ export const addABI = (abi, address) => {
  */
 export const decodeInputData = (inputData, address) => {
   if (!consensysDecode.getABIs().length) throw new Error('No ABIs added to system');
+  if (inputData === '0x') return ''; // no need for decoding if inputData is empty
   if (!inputData || !isAddress(address)) throw new Error('decodedData or address are undefined/invalid');
   const decodedData = consensysDecode.decodeMethod(inputData);
   if (!decodedData) {
