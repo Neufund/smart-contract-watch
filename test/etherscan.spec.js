@@ -6,12 +6,11 @@ import rimraf from 'rimraf';
 import chaiAsPromised from 'chai-as-promised';
 import rp from 'request-promise';
 import { getABI } from '../src/etherscan';
-import { mockABI } from './mockedData/mockABI';
+import esopABI from './mockedData/mockABI';
 
 chai.use(chaiAsPromised);
 chai.should();
 const expect = chai.expect;
-
 
 describe('GetABI', () => {
   const address = '0xda7c27c04f66842faf20644814b644e25e1766ea';
@@ -20,6 +19,7 @@ describe('GetABI', () => {
   const jsonPath = path.join(dirpath, `${address}.json`);
   const jsonMock = path.join(__dirname, 'mockedData', 'etherscanSuccsess.json');
   const jsonFailMock = path.join(__dirname, 'mockedData', 'etherscanFail.json');
+
   beforeEach(() => {
     rimraf.sync(dirpath);
     sinon.stub(rp, 'get').returns(Promise.resolve(JSON.parse(fs.readFileSync(jsonMock, { encoding: 'utf8' }))));
@@ -31,8 +31,8 @@ describe('GetABI', () => {
   });
   it('should scrape smart-contract ABI from etherscan and store locally', async () => {
     const EtherscanABi = await getABI(address);
-    expect(await EtherscanABi).to.deep.equal(mockABI);
-    expect(JSON.parse(fs.readFileSync(jsonPath, { encoding: 'utf8' }))).to.deep.equal(mockABI);
+    expect(await EtherscanABi).to.deep.equal(esopABI);
+    expect(JSON.parse(fs.readFileSync(jsonPath, { encoding: 'utf8' }))).to.deep.equal(esopABI);
   });
   it('should take ABI from local file when present', async () => {
     await getABI(address);
