@@ -19,3 +19,5 @@ export const defaultBlockNumber = -1;
 export const defaultFromBlockNumber = 0;
 
 export const getWatchingConfigPath = () => 'src/.watch.yml';
+
+export const getOutputModel = () => process.env.OUTPUT_TYPE;

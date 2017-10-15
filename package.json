@@ -42,6 +42,7 @@
     "request-promise": "^4.2.1",
     "web3": "0.19.0",
     "winston": "2.3.1",
+    "winston-graylog2": "^0.7.0",
     "yamljs": "^0.3.0"
   }
 }

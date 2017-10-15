@@ -1,6 +1,7 @@
 import logger from '../logger';
+import grayLog from './graylog';
 
-export default (data) => {
+export default (data, type = 'terminal') => {
   const txHash = data.transaction.hash;
   let functionName = '';
   let functionParams = '';
@@ -29,5 +30,13 @@ export default (data) => {
   if (data.transaction.gas === data.transaction.gasUsed) {
     extraMessage = 'Suspected fail';
   }
-  logger.info(`tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`);
+
+  switch (type) {
+    case 'terminal':
+      logger.info(`tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`);
+      break;
+    case 'grayLog':
+      grayLog.info('Transaction', data);
+      break;
+  }
 };

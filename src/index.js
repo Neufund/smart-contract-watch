@@ -6,7 +6,7 @@ import { decodeInputData, decodeLogData, addABI } from './decoder';
 import JsonRpc from './jsonrpc';
 import { getABI } from './etherscan';
 import output from './output';
-import { getWatchingConfigPath } from './config';
+import { getWatchingConfigPath, getOutputModel } from './config';
 
 /**
  *
@@ -37,7 +37,7 @@ const transactionHandler = async (transaction) => {
   } catch (error) {
     logger.error(`txHash: ${transaction.hash} ${error.message}`);
   }
-  output({ transaction, decodedInputDataResult, decodedLogs });
+  output({ transaction, decodedInputDataResult, decodedLogs }, getOutputModel());
 };
 
 /**
