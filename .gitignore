@@ -5,3 +5,4 @@ node_modules/
 contracts/
 .nyc_output
 coverage/
+.vscode/

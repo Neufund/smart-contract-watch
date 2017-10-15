@@ -1,5 +1,5 @@
 import winston from 'winston';
-import winstonGrayLog from 'winston-graylog2';
+import WinstonGrayLog from 'winston-graylog2';
 import { getLogLevel } from '../config';
 
 const winstonGrayLogOptions = {
@@ -11,7 +11,7 @@ const winstonGrayLogOptions = {
     return msg.trim();
   },
   graylog: {
-    servers: [{ host: 'localhost', port: 12201 }, { host: 'remote.host', port: 12201 }],
+    servers: [{ host: 'localhost', port: 12201 }],
     hostname: 'myServer',
     facility: 'myAwesomeApp',
     bufferSize: 1400,
@@ -22,5 +22,5 @@ const winstonGrayLogOptions = {
 export default new (winston.Logger)({
   exitOnError: false,
   transports: [
-    new (winstonGrayLog)(winstonGrayLogOptions),
+    new (WinstonGrayLog)(winstonGrayLogOptions),
   ] });
