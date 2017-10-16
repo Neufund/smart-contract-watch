@@ -40,6 +40,7 @@ const transactionHandler = async (transaction) => {
   output({ transaction, decodedInputDataResult, decodedLogs });
 };
 
+
 /**
  * The main function that has the full steps
  */
@@ -59,7 +60,7 @@ const main = async () => {
   try {
     const jsonRpc = new JsonRpc(addresses, from, to, transactionHandler);
 
-    await jsonRpc.scanBlocks();
+    await jsonRpc.scanBlocks(true);
     logger.info('Finish scanning all the blocks');
   } catch (e) {
     logger.log('verbose', e.stack || e);
