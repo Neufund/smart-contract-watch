@@ -59,7 +59,7 @@ export default class JsonRpc {
 
     // If the smart contract recieved transaction or there's logs execute the callback function 
     if ((txn.to && isInArray(this.addresses, txn.to.toLowerCase())) || logs.length > 0) {
-      return JsonRpc.getTransactionFormat(txn, txnReceipts, logs);      
+      return JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
     }
     return null;
   }
@@ -74,21 +74,21 @@ export default class JsonRpc {
     if (block && block.transactions && Array.isArray(block.transactions)) {
       const transactionsPromises = [];
       for (let i = 0; i < block.transactions.length; i += 1) {
-        const txn = block.transactions[i];        
+        const txn = block.transactions[i];
         transactionsPromises.push(this._scanTransaction(txn));
       }
 
-      let transactionsResult = []
-      for ( let i = 0 ;  i < transactionsPromises.length ; i++) {
+      const transactionsResult = [];
+      for (let i = 0; i < transactionsPromises.length; i += 1) {
         const singleTransactionResult = await transactionsPromises[i];
-        if(singleTransactionResult)
-          transactionsResult.push(singleTransactionResult);
+        if (singleTransactionResult) { transactionsResult.push(singleTransactionResult); }
       }
-      
-      if(this.callback)
-        transactionsResult.forEach( txn => {
-          this.callback(txn)
+
+      if (this.callback) {
+        transactionsResult.forEach((txn) => {
+          this.callback(txn);
         });
+      }
     }
   }
 
