@@ -4,14 +4,15 @@ import web3 from './web3/web3Provider';
 import logger from './logger';
 import { isInArray } from './utils';
 import { isAddress, validateBlockNumber } from './web3/utils';
+import initCustomRPCs from './web3/customeRpc';
 
 export default class JsonRpc {
   /**
    * Initialize class local variables
-   * @param Array addresses 
-   * @param int currentBlock 
-   * @param int toBlock 
-   * @param function callback 
+   * @param Array addresses
+   * @param int currentBlock
+   * @param int toBlock
+   * @param function callback
    */
   constructor(addresses, fromBlock, toBlock, callback = null) {
     this.addresses = addresses.map((address) => {
@@ -26,12 +27,15 @@ export default class JsonRpc {
     if (!callback) {
       logger.info('Warning!: No callback function defined');
     }
+    const test = initCustomRPCs();
+    // check https://github.com/ethereum/wiki/wiki/JSON-RPC#parameters-38
+    // Example use case 
+    test.getLogs({ address: '0xda7c27c04f66842faf20644814b644e25e1766ea', fromBlock: '0x1', topics: [] });
   }
-
   /**
-   * This will return the final data structure 
+   * This will return the final data structure
    * for the transaction resopnse
-   * @param string tx 
+   * @param string tx
    * @param Object receipt
    * @param Array logs
    * @return object
@@ -44,8 +48,8 @@ export default class JsonRpc {
   }
 
   /**
-   * Async function that gets the transaction and transaction receipt 
-   * then get the logs out of the receipt transaction then execute the callback function  
+   * Async function that gets the transaction and transaction receipt
+   * then get the logs out of the receipt transaction then execute the callback function
    * @param string txn
    */
   async _scanTransaction(txn) {
@@ -57,7 +61,7 @@ export default class JsonRpc {
       throw new Error('Address you entered is not a smart contract');
     }
 
-    // If the smart contract recieved transaction or there's logs execute the callback function 
+    // If the smart contract recieved transaction or there's logs execute the callback function
     if ((txn.to && isInArray(this.addresses, txn.to.toLowerCase())) || logs.length > 0) {
       const transactionResult = JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
       if (this.callback) { await this.callback(transactionResult); }
@@ -67,7 +71,7 @@ export default class JsonRpc {
   /**
    * This function handles the transactions that exist in one block
    *  and puts them into an array of promises, then executes them.
-   * @param Object block 
+   * @param Object block
    */
   async _scanBlockCallback(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
