@@ -37,6 +37,6 @@ export default (data, type = 'terminal') => {
       grayLog.info('Transaction', data);
       break;
     default:
-      throw new Error('Output module is undefind');
+      throw new Error(`${type} output module is undefind`);
   }
 };

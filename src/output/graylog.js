@@ -6,7 +6,7 @@ const winstonGrayLogOptions = {
   name: 'Graylog',
   level: getLogLevel(),
   silent: false,
-  handleExceptions: false,
+  handleExceptions: true,
   prelog(msg) {
     return msg.trim();
   },
