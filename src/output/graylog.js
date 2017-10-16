@@ -1,6 +1,6 @@
 import winston from 'winston';
 import WinstonGrayLog from 'winston-graylog2';
-import { getLogLevel } from '../config';
+import { getLogLevel, graylogConfig } from '../config';
 
 const winstonGrayLogOptions = {
   name: 'Graylog',
@@ -11,12 +11,10 @@ const winstonGrayLogOptions = {
     return msg.trim();
   },
   graylog: {
-    servers: [{ host: 'localhost', port: 12201 }],
-    hostname: 'myServer',
-    facility: 'myAwesomeApp',
+    servers: [{ host: graylogConfig['host'], port: graylogConfig['port'] }],
+    hostname: 'Smart Contract Watch',
     bufferSize: 1400,
-  },
-  staticMeta: { env: 'staging' },
+  }
 };
 
 export default new (winston.Logger)({

@@ -6,3 +6,4 @@ contracts/
 .nyc_output
 coverage/
 .vscode/
+src/.watch.yml

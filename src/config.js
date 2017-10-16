@@ -5,7 +5,6 @@ dotenv.config();
 /**
  * getSocketPortNumber will return the port number from .env file 
  */
-
 export const getSocketPortNumber = () => parseInt(process.env.SOCKET_IO_PORT, 10);
 
 export const getLogLevel = () => process.env.LOG_LEVEL;
@@ -21,3 +20,6 @@ export const defaultFromBlockNumber = 0;
 export const getWatchingConfigPath = () => 'src/.watch.yml';
 
 export const getOutputModel = () => process.env.OUTPUT_TYPE;
+
+export const graylogConfig = { host: process.env.GRAYLOG_HOSTNAME,
+  GRAYLOG_PORT: process.env.OUTPUT_TYPE };
