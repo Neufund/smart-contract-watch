@@ -79,14 +79,14 @@ export default class JsonRpc {
       }
 
       let transactionsResult = []
-      for ( let i = 0 ;  i < transactionsPromises.length ; i++) {        
+      for ( let i = 0 ;  i < transactionsPromises.length ; i++) {
         const singleTransactionResult = await transactionsPromises[i];
         if(singleTransactionResult)
           transactionsResult.push(singleTransactionResult);
       }
       
       if(this.callback)
-        transactionsResult.forEach( txn => {        
+        transactionsResult.forEach( txn => {
           this.callback(txn)
         });
     }
