@@ -3,15 +3,15 @@ import sinon from 'sinon';
 import web3 from '../src/web3/web3Provider';
 
 let command;
-let lastBlockNumber = Number.MAX_SAFE_INTEGER;
+const lastBlockNumber = Number.MAX_SAFE_INTEGER;
 const getBlockNumber = (callback) => {
   if (callback) { callback(null, Number.MAX_SAFE_INTEGER); }
 };
 const watchPath = 'test/mockedData/.watch.yml';
 
 describe('Command read input from terminal', () => {
-  let processArgv;  
-  beforeEach(() => {    
+  let processArgv;
+  beforeEach(() => {
     processArgv = process.argv;
     process.argv = [
       'node',
@@ -93,8 +93,8 @@ describe('Command read input from terminal', () => {
 });
 
 describe('Command read input config file', () => {
-  let processArgv;  
-  beforeEach(() => {    
+  let processArgv;
+  beforeEach(() => {
     processArgv = process.argv;
     process.argv = [
       'node',
@@ -111,7 +111,7 @@ describe('Command read input config file', () => {
   });
 
 
-  it('Should return the expected values from config file correctly', () => {    
+  it('Should return the expected values from config file correctly', () => {
     const program = command(watchPath, watchPath);
 
     // expected result
@@ -122,7 +122,7 @@ describe('Command read input config file', () => {
     expect(program).deep.equal({ from, to, addresses });
   });
 
-  it('Should return the from value from the input and the rest from the config file', () => {  
+  it('Should return the from value from the input and the rest from the config file', () => {
     process.argv = process.argv.concat([
       '-f',
       3917869,
@@ -137,7 +137,7 @@ describe('Command read input config file', () => {
     expect(program).deep.equal({ from, to, addresses });
   });
 
-  it('Should return the addresses value from the input and the rest from the config file', () => {    
+  it('Should return the addresses value from the input and the rest from the config file', () => {
     process.argv = process.argv.concat([
       '-a',
       '0x91c94bee75786fbbfdcfefba1102b68f48a002f4',

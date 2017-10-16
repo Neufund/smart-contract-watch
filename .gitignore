@@ -7,3 +7,4 @@ contracts/
 coverage/
 .vscode/
 src/.watch.yml
+coverage.lcov

@@ -32,9 +32,7 @@ export default (data, type = 'terminal') => {
   }
   logger.info(`tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`);
   switch (type) {
-    case 'terminal':
-      logger.info(`tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`);
-      break;
+    case 'terminal': break;
     case 'graylog':
       grayLog.info('Transaction', data);
       break;

@@ -11,10 +11,10 @@ const winstonGrayLogOptions = {
     return msg.trim();
   },
   graylog: {
-    servers: [{ host: graylogConfig['host'], port: graylogConfig['port'] }],
+    servers: [{ host: graylogConfig.host, port: graylogConfig.port }],
     hostname: 'Smart Contract Watch',
     bufferSize: 1400,
-  }
+  },
 };
 
 export default new (winston.Logger)({
