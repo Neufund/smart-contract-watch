@@ -2,7 +2,7 @@ import bluebird from 'bluebird';
 import { defaultBlockNumber, defaultFromBlockNumber } from './config';
 import web3 from './web3/web3Provider';
 import logger from './logger';
-import { isInArray } from './utils';
+import { isInArray, isQueriedTransaction } from './utils';
 import { isAddress, validateBlockNumber } from './web3/utils';
 import initCustomRPCs from './web3/customRpc';
 
@@ -51,7 +51,7 @@ export default class JsonRpc {
    * @param Array logs
    * @return object
    */
-  static getBlockAndTransactionLogsFormat(block, logs) {
+  getBlockAndTransactionLogsFormat(block, logs) {
     const transactionLogs = {};
     logs.forEach((log) => {
       if (!Array.isArray(transactionLogs[log.transactionHash])) {
@@ -60,7 +60,10 @@ export default class JsonRpc {
       transactionLogs[log.transactionHash].push(log);
     });
     const result = [];
-    block.transactions.forEach((transaction) => {
+
+    block.transactions.filter(transaction =>
+      isInArray(this.addresses, transaction.to)
+    ).forEach((transaction) => {
       const transactionObject = transaction;
       if (typeof transactionLogs[transactionObject.hash] !== 'undefined') {
         transactionObject.logs = transactionLogs[transactionObject.hash];
@@ -88,9 +91,10 @@ export default class JsonRpc {
     }
 
     // If the smart contract recieved transaction or there's logs execute the callback function
-    if ((txn.to && isInArray(this.addresses, txn.to.toLowerCase())) || logs.length > 0) {
+    if (isQueriedTransaction({ txn, txnReceipts, logs, addresses: this.addresses })) {
       return JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
     }
+
     return null;
   }
 
@@ -160,7 +164,7 @@ export default class JsonRpc {
           if (isFastMode) {
             const logs = await this.getLogsFromOneBlock();
             const blockTransactionsWithLogsList =
-            JsonRpc.getBlockAndTransactionLogsFormat(block, logs);
+            this.getBlockAndTransactionLogsFormat(block, logs);
 
             if (this.callback) {
               blockTransactionsWithLogsList.forEach((transaction) => {

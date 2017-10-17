@@ -7,11 +7,15 @@ import chaiAsPromised from 'chai-as-promised';
 import rp from 'request-promise';
 import { getABI } from '../src/etherscan';
 import { mockABI } from './mockedData/mockABI';
+import web3Utils from '../src/web3/utils';
 
 chai.use(chaiAsPromised);
 chai.should();
 const expect = chai.expect;
 
+const networkId = {
+  MAINNET: 1,
+};
 
 describe('GetABI', () => {
   const address = '0xda7c27c04f66842faf20644814b644e25e1766ea';
@@ -20,9 +24,11 @@ describe('GetABI', () => {
   const jsonPath = path.join(dirpath, `${address}.json`);
   const jsonMock = path.join(__dirname, 'mockedData', 'etherscanSuccsess.json');
   const jsonFailMock = path.join(__dirname, 'mockedData', 'etherscanFail.json');
+
   beforeEach(() => {
     rimraf.sync(dirpath);
     sinon.stub(rp, 'get').returns(Promise.resolve(JSON.parse(fs.readFileSync(jsonMock, { encoding: 'utf8' }))));
+    sinon.stub(web3Utils, 'getEtherNetworkId').returns(networkId.MAINNET);
   });
 
   it('should create a contract directory if there was non', async () => {
@@ -45,5 +51,6 @@ describe('GetABI', () => {
   });
   afterEach(() => {
     rp.get.restore();
+    web3Utils.getEtherNetworkId.restore();
   });
 });
