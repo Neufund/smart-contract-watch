@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 /**
- * getSocketPortNumber will return the port number from .env file 
+ * getSocketPortNumber will return the port number from .env file
  */
 
 export const getSocketPortNumber = () => parseInt(process.env.SOCKET_IO_PORT, 10);
@@ -19,3 +19,5 @@ export const defaultBlockNumber = -1;
 export const defaultFromBlockNumber = 0;
 
 export const getWatchingConfigPath = () => 'src/.watch.yml';
+
+// TODO: Add error checks for each env variable

@@ -17,7 +17,8 @@ export default (filePath, lastBlockNumber) => {
     .version('0.1.0')
     .option('-a, --addresses <n>', 'List of address', list)
     .option('-f, --from [n]', 'From block', typeof watchConfig.from !== 'undefined' ? watchConfig.from : defaultBlockNumber)
-    .option('-t, --to [n]', 'To block', typeof watchConfig.to !== 'undefined' ? watchConfig.to : defaultBlockNumber);
+    .option('-t, --to [n]', 'To block', typeof watchConfig.to !== 'undefined' ? watchConfig.to : defaultBlockNumber)
+    .option('-q, --quick [n]', 'Quick Mode', typeof watchConfig.quick !== 'undefined' ? watchConfig.quick : false);
 
   program.parse(process.argv);
   if (typeof program === 'undefined') { throw new Error('No args are specifed in the command or in the .watch.yml file'); }
@@ -25,6 +26,7 @@ export default (filePath, lastBlockNumber) => {
   let addresses = null;
   const from = program.from;
   const to = program.to;
+  const quickMode = program.quick;
 
   if (typeof program.addresses !== 'undefined') {
     addresses = program.addresses;
@@ -47,5 +49,5 @@ export default (filePath, lastBlockNumber) => {
      be larger than "${to}"`);
   }
 
-  return { from, to, addresses };
+  return { from, to, addresses, quickMode };
 };
