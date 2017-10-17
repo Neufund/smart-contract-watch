@@ -4,7 +4,7 @@ import web3 from './web3/web3Provider';
 import logger from './logger';
 import { isInArray } from './utils';
 import { isAddress, validateBlockNumber } from './web3/utils';
-import initCustomRPCs from './web3/customeRpc';
+import initCustomRPCs from './web3/customRpc';
 
 export default class JsonRpc {
   /**
