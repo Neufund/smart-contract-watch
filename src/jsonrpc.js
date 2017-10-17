@@ -51,11 +51,12 @@ export default class JsonRpc {
    * @param Array logs
    * @return object
    */
-  static getBlockAndTransactionLogsFormat(block, logs) {  
+  static getBlockAndTransactionLogsFormat(block, logs) {
     const transactionLogs = {};
-    logs.forEach((log) => {      
-      if(!Array.isArray(transactionLogs[log.transactionHash]))
+    logs.forEach((log) => {
+      if (!Array.isArray(transactionLogs[log.transactionHash])) {
         transactionLogs[log.transactionHash] = [];
+      }
       transactionLogs[log.transactionHash].push(log);
     });
     const result = [];
@@ -157,7 +158,6 @@ export default class JsonRpc {
           } else {
             await this._scanBlockCallback(block);
           }
-
           this.currentBlock = parseInt(this.currentBlock, 10) + 1;
           logger.debug(`Current block number is ${this.currentBlock}`);
         }
