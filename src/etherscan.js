@@ -1,7 +1,8 @@
 import rp from 'request-promise';
 import fs from 'fs';
 import path from 'path';
-import { getAccessToken } from './config';
+import { getAccessToken, networksById } from './config';
+import web3Utils from './web3/utils';
 
 
 const expectedResponse = {
@@ -32,8 +33,11 @@ const validateResponse = (response) => {
  */
 
 const scrapeABI = async (address) => {
+  const networkID = web3Utils.getEtherNetworkId();
+
+  if (!networksById[networkID]) throw new Error('Network not supported!. Etherscan only supports, Mainnet, ropsten, rinkeby, kovan');
   const options = {
-    uri: 'https://api.etherscan.io/api?module=contract',
+    uri: `https://${networksById[networkID]}.etherscan.io/api?module=contract`,
     qs: {
       action: 'getabi',
       address,

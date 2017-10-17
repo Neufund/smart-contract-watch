@@ -1,8 +1,10 @@
+import web3Utils from '../web3/utils';
+import { networksById } from '../config';
 const GRAYLOG_ERROR = 'ERROR';
 const GRAYLOG_INFO = 'INFO';
 
 export default (transaction, decodedTransaction, decodedLogs) => ({
-  networkId: transaction.networkId,
+  networkId: networksById[web3Utils.getEtherNetworkId()],
   blockHash: transaction.blockHash,
   blockNumber: transaction.blockNumber,
   fromAddress: transaction.from,
@@ -11,7 +13,7 @@ export default (transaction, decodedTransaction, decodedLogs) => ({
   input: transaction.input,
   gas: transaction.gas,
   gasPrice: transaction.gasPrice,
-  status: transaction.status ? GRAYLOG_INFO : GRAYLOG_ERROR,
+  status: transaction.status,
   value: transaction.value,
   transactionType: transaction.contractAddress ? 'Contract Cration' : 'Transaction',
   contractAddress: transaction.contractAddress,

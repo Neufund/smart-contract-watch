@@ -27,18 +27,16 @@ export default (data, type = 'terminal') => {
       eventText += ')';
     });
   }
-  if (data.transaction.gas === data.transaction.gasUsed) {
+  if (data.transaction.status === 1 || data.transaction.status === 0) {
+    extraMessage = data.transaction.status ? 'Success' : 'failed';
+  } else if (data.transaction.gas === data.transaction.gasUsed) {
     extraMessage = 'Suspected fail';
   }
   switch (type) {
     case 'terminal':
       logger.info(`tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`);
       break;
-    case 'graylog':
-      console.log(JSON.stringify({ transaction: data.transaction,
-        decodedInputDataResult:
-         data.decodedInputDataResult,
-        decodedLogs: data.decodedLogs }));
+    case 'graylog':      
       logger.log('info', JSON.stringify(grayLogFromat(data.transaction,
         data.decodedInputDataResult, data.decodedLogs)));
       break;

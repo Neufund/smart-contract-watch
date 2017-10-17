@@ -2,16 +2,16 @@ import bluebird from 'bluebird';
 import { defaultBlockNumber, defaultFromBlockNumber } from './config';
 import web3 from './web3/web3Provider';
 import logger from './logger';
-import { isInArray } from './utils';
+import { isInArray, isQueriedTransaction } from './utils';
 import { isAddress, validateBlockNumber } from './web3/utils';
 
 export default class JsonRpc {
   /**
    * Initialize class local variables
-   * @param Array addresses 
-   * @param int currentBlock 
-   * @param int toBlock 
-   * @param function callback 
+   * @param Array addresses
+   * @param int currentBlock
+   * @param int toBlock
+   * @param function callback
    */
   constructor(addresses, fromBlock, toBlock, callback = null) {
     this.addresses = addresses.map((address) => {
@@ -29,9 +29,9 @@ export default class JsonRpc {
   }
 
   /**
-   * This will return the final data structure 
+   * This will return the final data structure
    * for the transaction resopnse
-   * @param string tx 
+   * @param string tx
    * @param Object receipt
    * @param Array logs
    * @return object
@@ -44,8 +44,8 @@ export default class JsonRpc {
   }
 
   /**
-   * Async function that gets the transaction and transaction receipt 
-   * then get the logs out of the receipt transaction then execute the callback function  
+   * Async function that gets the transaction and transaction receipt
+   * then get the logs out of the receipt transaction then execute the callback function
    * @param string txn
    */
   async _scanTransaction(txn) {
@@ -57,26 +57,39 @@ export default class JsonRpc {
       throw new Error('Address you entered is not a smart contract');
     }
 
-    // If the smart contract recieved transaction or there's logs execute the callback function 
-    if ((txn.to && isInArray(this.addresses, txn.to.toLowerCase())) || logs.length > 0) {
-      const transactionResult = JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
-      if (this.callback) { await this.callback(transactionResult); }
+    // If the smart contract recieved transaction or there's logs execute the callback function
+    if (isQueriedTransaction({ txn, txnReceipts, logs, addresses: this.addresses })) {
+      return JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
     }
+
+    return null;
   }
 
   /**
    * This function handles the transactions that exist in one block
-   *  and puts them into an array of promises, then executes them.
+   *  and puts them into an array of promises, then executes them and finally 
+   * send them to the output module;
    * @param Object block 
    */
   async _scanBlockCallback(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
-      const promises = [];
+      const transactionsPromises = [];
       for (let i = 0; i < block.transactions.length; i += 1) {
         const txn = block.transactions[i];
-        promises.push(this._scanTransaction(txn));
+        transactionsPromises.push(this._scanTransaction(txn));
       }
-      await Promise.all(promises);
+
+      const transactionsResult = [];
+      for (let i = 0; i < transactionsPromises.length; i += 1) {
+        const singleTransactionResult = await transactionsPromises[i];
+        if (singleTransactionResult) { transactionsResult.push(singleTransactionResult); }
+      }
+
+      if (this.callback) {
+        transactionsResult.forEach((txn) => {
+          this.callback(txn);
+        });
+      }
     }
   }
 
