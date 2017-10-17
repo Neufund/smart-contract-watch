@@ -40,13 +40,14 @@ const transactionHandler = async (transaction) => {
   output({ transaction, decodedInputDataResult, decodedLogs });
 };
 
+
 /**
  * The main function that has the full steps
  */
 const main = async () => {
   const lastBlockNumber = await bluebird.promisify(web3.eth.getBlockNumber)();
 
-  const { from, to, addresses } = command(getWatchingConfigPath(), lastBlockNumber);
+  const { from, to, addresses, quickMode } = command(getWatchingConfigPath(), lastBlockNumber);
   logger.debug('Start process');
 
   const promisesArray = addresses.map(address => getABI(address));
@@ -59,7 +60,7 @@ const main = async () => {
   try {
     const jsonRpc = new JsonRpc(addresses, from, to, transactionHandler);
 
-    await jsonRpc.scanBlocks();
+    await jsonRpc.scanBlocks(quickMode);
     logger.info('Finish scanning all the blocks');
   } catch (e) {
     logger.log('verbose', e.stack || e);

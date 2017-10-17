@@ -59,15 +59,8 @@ describe('JsonRpc', () => {
     web3.eth.getBlockNumber.restore();
   });
 
-  it('Should have 0 callbackExecutedCounter because there\'s no address to check', async () => {
+  it('callbackExecutedCounter should equal 0 because there\'s no address to check', async () => {
     addresses = [];
-    jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, tranactionHandler);
-    await jsonRpc.scanBlocks();
-    expect(callbackExecutedCounter).to.equal(0);
-  });
-
-  it('Should have 0 callbackExecutedCounter because block has no transactions', async () => {
-    addresses = ['0xa74476443119A942dE498590Fe1f2454d7D4aC0d'];
     jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, tranactionHandler);
     await jsonRpc.scanBlocks();
     expect(callbackExecutedCounter).to.equal(0);
@@ -91,5 +84,5 @@ describe('JsonRpc', () => {
     jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, tranactionHandler);
     await jsonRpc.scanBlocks();
     expect(callbackExecutedCounter).to.equal(expectedIterations);
-  });
+  });  
 });
