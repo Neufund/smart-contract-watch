@@ -26,7 +26,9 @@ export default (data) => {
       eventText += ')';
     });
   }
-  if (data.transaction.gas === data.transaction.gasUsed) {
+  if (data.transaction.status === 1 || data.transaction.status === 0) {
+    extraMessage = data.transaction.status ? 'Success' : 'failed';
+  } else if (data.transaction.gas === data.transaction.gasUsed) {
     extraMessage = 'Suspected fail';
   }
   logger.info(`tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`);
