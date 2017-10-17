@@ -37,8 +37,8 @@ describe('GetABI', () => {
   });
   it('should scrape smart-contract ABI from etherscan and store locally', async () => {
     const EtherscanABi = await getABI(address);
-    expect(await EtherscanABi).to.deep.equal(esopABI);
-    expect(JSON.parse(fs.readFileSync(jsonPath, { encoding: 'utf8' }))).to.deep.equal(esopABI);
+    expect(await EtherscanABi).to.deep.equal(mockABI);
+    expect(JSON.parse(fs.readFileSync(jsonPath, { encoding: 'utf8' }))).to.deep.equal(mockABI);
   });
   it('should take ABI from local file when present', async () => {
     await getABI(address);
