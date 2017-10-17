@@ -59,24 +59,37 @@ export default class JsonRpc {
 
     // If the smart contract recieved transaction or there's logs execute the callback function
     if (isQueriedTransaction({ txn, txnReceipts, logs, addresses: this.addresses })) {
-      const transactionResult = JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
-      if (this.callback) { await this.callback(transactionResult); }
+      return JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
     }
+
+    return null;
   }
 
   /**
    * This function handles the transactions that exist in one block
-   *  and puts them into an array of promises, then executes them.
-   * @param Object block
+   *  and puts them into an array of promises, then executes them and finally 
+   * send them to the output module;
+   * @param Object block 
    */
   async _scanBlockCallback(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
-      const promises = [];
+      const transactionsPromises = [];
       for (let i = 0; i < block.transactions.length; i += 1) {
         const txn = block.transactions[i];
-        promises.push(this._scanTransaction(txn));
+        transactionsPromises.push(this._scanTransaction(txn));
       }
-      await Promise.all(promises);
+
+      const transactionsResult = [];
+      for (let i = 0; i < transactionsPromises.length; i += 1) {
+        const singleTransactionResult = await transactionsPromises[i];
+        if (singleTransactionResult) { transactionsResult.push(singleTransactionResult); }
+      }
+
+      if (this.callback) {
+        transactionsResult.forEach((txn) => {
+          this.callback(txn);
+        });
+      }
     }
   }
 
