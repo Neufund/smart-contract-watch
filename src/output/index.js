@@ -1,5 +1,5 @@
 import logger from '../logger';
-import grayLog from './graylog';
+import grayLogFromat from './graylogFormat';
 
 export default (data, type = 'terminal') => {
   const txHash = data.transaction.hash;
@@ -35,7 +35,12 @@ export default (data, type = 'terminal') => {
       logger.info(`tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`);
       break;
     case 'graylog':
-      grayLog.info('Transaction', data);
+      console.log(JSON.stringify({ transaction: data.transaction,
+        decodedInputDataResult:
+         data.decodedInputDataResult,
+        decodedLogs: data.decodedLogs }));
+      logger.log('info', JSON.stringify(grayLogFromat(data.transaction,
+        data.decodedInputDataResult, data.decodedLogs)));
       break;
     default:
       throw new Error(`${type} output module is undefind`);
