@@ -1,11 +1,12 @@
 import bluebird from 'bluebird';
-import web3 from './web3/web3Provider';
 import logger from './logger';
 import command from './command';
-import { decodeInputData, decodeLogData, addABI } from './decoder';
+import Decoder from './decoder';
 import JsonRpc from './jsonrpc';
 import { getABI } from './etherscan';
 import output from './output';
+import web3 from './web3/web3Provider';
+import { isContractCreationTransaction } from './utils';
 import { getWatchingConfigPath } from './config';
 
 /**
@@ -22,20 +23,32 @@ import { getWatchingConfigPath } from './config';
  * Decode a transaction and all logs generated from it then send results to output model
  * @param {*} transaction
  */
+
+const addressAbiMap = {};
+
 const transactionHandler = async (transaction) => {
   let decodedLogs;
   let decodedInputDataResult;
+  if (isContractCreationTransaction(transaction.to)) {
+    try {
+      decodedInputDataResult = addressAbiMap[transaction.contractAddress]
+        .decodeConstructor(transaction.input);
+      decodedLogs = null;
+    } catch (error) {
+      logger.error(`txHash: ${transaction.hash} ${error.message}`);
+    }
+  } else {
+    try {
+      decodedInputDataResult = addressAbiMap[transaction.to].decodeMethod(transaction.input);
+    } catch (error) {
+      logger.error(`txHash: ${transaction.hash} ${error.message}`);
+    }
 
-  try {
-    decodedInputDataResult = decodeInputData(transaction.input);
-  } catch (error) {
-    logger.error(`txHash: ${transaction.hash} ${error.message}`);
-  }
-
-  try {
-    decodedLogs = decodeLogData(transaction.logs);
-  } catch (error) {
-    logger.error(`txHash: ${transaction.hash} ${error.message}`);
+    try {
+      decodedLogs = addressAbiMap[transaction.to].decodeLogs(transaction.logs);
+    } catch (error) {
+      logger.error(`txHash: ${transaction.hash} ${error.message}`);
+    }
   }
   output({ transaction, decodedInputDataResult, decodedLogs });
 };
@@ -49,11 +62,12 @@ const main = async () => {
   const { from, to, addresses } = command(getWatchingConfigPath(), lastBlockNumber);
   logger.debug('Start process');
 
-  const promisesArray = addresses.map(address => getABI(address));
+  const PromisifiedAbiObjects = addresses.map(async address => (
+    { address, abi: await getABI(address) }
+  ));
 
-  const promisifiedABIs = await Promise.all(promisesArray);
-  promisifiedABIs.forEach((abi, index) => {
-    addABI(abi, addresses[index]);
+  (await Promise.all(PromisifiedAbiObjects)).forEach((object) => {
+    addressAbiMap[object.address] = new Decoder(object.abi);
   });
 
   try {

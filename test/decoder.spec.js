@@ -1,29 +1,18 @@
 import { expect } from 'chai';
-import { addABI, decodeLogData, decodeInputData, getDecodedAddresses } from '../src/decoder';
-import { mockABI } from './mockedData/mockABI';
+import Decoder from '../src/decoder';
+import esopABI from './mockedData/mockABI';
 
 describe('Decoder Module', () => {
   const esopAddress = '0xda7c27c04f66842faf20644814b644e25e1766ea';
-  const invalidAddress = '0x6a58a4e262b6ead9eb40f41313d6d1fbbb41c16';
-  const nonAddedABIaddress = '0xa74476443119A942dE498590Fe1f2454d7D4aC0d';
-  describe('getDecodedAddresses', () => {
-    it('should return an empty array', () => {
-      expect(getDecodedAddresses()).to.have.lengthOf(0);
-    });
-    it('should return an array with added address', () => {
-      addABI(mockABI, esopAddress);
-      expect(getDecodedAddresses()).to.deep.include(esopAddress);
-    });
-  });
-  describe('addABI', () => {
-    it('should throw if address was invalid', () => {
-      expect(() => addABI(mockABI, invalidAddress)).to.throw('Input is not an address');
-    });
+  const decoderInstance = new Decoder(esopABI);
+
+  describe('constructor', () => {
     it('should throw if ABI was undefined', () => {
-      expect(() => addABI(null, esopAddress)).to.throw('can\'t add undefined/null ABI');
+      expect(() => new Decoder(null)).to.throw('Expected ABI array, got object');
     });
   });
-  describe('decodeInputData', () => {
+
+  describe('decodeMethod', () => {
     it('should return function name and its params for transaction', () => {
       const dataSample1 = '0xcc96b9430000000000000000000000006a58a4e262b6ead9eb40f41313d6d1fbbbb41c160000000000000000000000000000000000000000000000000000000057fabde0000000000000000000000000000000000000000000000000000000005960cc0600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001';
       const openESOP = {
@@ -36,24 +25,22 @@ describe('Decoder Module', () => {
      { name: 'timeToSign', value: '1499515910', type: 'uint32' },
      { name: 'extraOptions', value: '0', type: 'uint32' },
      { name: 'poolCleanup', value: true, type: 'bool' }] };
-      const decodedInput = decodeInputData(dataSample1, esopAddress);
+      const decodedInput = decoderInstance.decodeMethod(dataSample1);
       expect(decodedInput).to.deep.equal(openESOP);
     });
     it('should return encoded if the ABI for this specific address is not added', () => {
       const dataSample1 = '0000000000000000000000000c53fe380aba335d144b6f0dbc6b588633f783d7000000000000000000000000f3a85b1c8818629e52d61';
-      const decodedInput = decodeInputData(dataSample1);
+      const decodedInput = decoderInstance.decodeMethod(dataSample1);
       expect(decodedInput).to.deep.equal({ name: 'UNDECODED', params: [{ name: 'rawData', value: '0000000000000000000000000c53fe380aba335d144b6f0dbc6b588633f783d7000000000000000000000000f3a85b1c8818629e52d61', type: 'data' }] });
     });
     it('should return an empty string if inputData was empty', () => {
       const dataSample1 = '0x';
-      const decodedInput = decodeInputData(dataSample1, nonAddedABIaddress);
+      const decodedInput = decoderInstance.decodeMethod(dataSample1);
       expect(decodedInput).to.deep.equal('');
     });
-    it('should throw if address/data is not sent', () => {
-      expect(() => decodeInputData(undefined)).to.throw('decodedData is undefined/invalid');
-    });
   });
-  describe('decodeLogData', () => {
+
+  describe('decodeLogs', () => {
     const testLogs = [
       {
         data: '',
@@ -78,15 +65,12 @@ describe('Decoder Module', () => {
       ],
       address: esopAddress }];
     it('should return decoded logs and its params from a transaction', () => {
-      const decodedInput = decodeLogData(testLogs);
+      const decodedInput = decoderInstance.decodeLogs(testLogs);
       expect(decodedInput).to.deep.equal(esopEvent);
     });
     it('should return encoded if the ABI for this specific address is not added', () => {
-      const decodedInput = decodeLogData(errTestLogs);
-      expect(decodedInput).to.deep.equal({ name: 'UNDECODED', events: [{ name: 'rawLogs', value: errTestLogs, type: 'logs' }] });
-    });
-    it('should throw if address/data is not sent', () => {
-      expect(() => decodeLogData(undefined)).to.throw('logData is undefined/invalid');
+      const decodedInput = decoderInstance.decodeLogs(errTestLogs);
+      expect(decodedInput).to.deep.contain({ name: 'UNDECODED', events: [{ name: 'rawLogs', value: errTestLogs, type: 'logs' }] });
     });
   });
 });
