@@ -6,7 +6,7 @@ const winstonGrayLogOptions = {
   name: 'Graylog',
   level: getLogLevel(),
   silent: false,
-  handleExceptions: true,
+  handleExceptions: false,
   prelog(msg) {
     return msg.trim();
   },
@@ -17,8 +17,10 @@ const winstonGrayLogOptions = {
   },
 };
 
-export default new (winston.Logger)({
-  exitOnError: false,
+const graylog = new (winston.Logger)({
+  exitOnError: true,
   transports: [
     new (WinstonGrayLog)(winstonGrayLogOptions),
   ] });
+
+export default graylog;

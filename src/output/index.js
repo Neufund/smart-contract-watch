@@ -30,9 +30,10 @@ export default (data, type = 'terminal') => {
   if (data.transaction.gas === data.transaction.gasUsed) {
     extraMessage = 'Suspected fail';
   }
-  logger.info(`tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`);
   switch (type) {
-    case 'terminal': break;
+    case 'terminal':
+      logger.info(`tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`);
+      break;
     case 'graylog':
       grayLog.info('Transaction', data);
       break;

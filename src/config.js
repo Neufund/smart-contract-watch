@@ -22,4 +22,4 @@ export const getWatchingConfigPath = () => 'src/.watch.yml';
 export const getOutputModel = () => process.env.OUTPUT_TYPE;
 
 export const graylogConfig = { host: process.env.GRAYLOG_HOSTNAME,
-  GRAYLOG_PORT: process.env.OUTPUT_TYPE };
+  port: process.env.GRAYLOG_PORT };
