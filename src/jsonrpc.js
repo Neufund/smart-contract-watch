@@ -96,14 +96,9 @@ export default class JsonRpc {
 
   /**
    * This function handles the transactions that exist in one block
-<<<<<<< HEAD
-   *  and puts them into an array of promises, then executes them.
-   * @param Object block
-=======
    *  and puts them into an array of promises, then executes them and finally 
    * send them to the output module;
    * @param Object block 
->>>>>>> master
    */
   async _scanBlockCallback(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
