@@ -81,7 +81,7 @@ export default class JsonRpc {
    * then get the logs out of the receipt transaction then execute the callback function
    * @param string txn
    */
-  async _scanTransaction(txn) {
+  async scanTransaction(txn) {
     const txnReceipts = await bluebird.promisify(this.web3Instance.getTransactionReceipt)(txn.hash);
     const logs = txnReceipts.logs ? txnReceipts.logs.filter(log => isInArray(this.addresses,
       log.address)) : [];
@@ -104,12 +104,12 @@ export default class JsonRpc {
    * send them to the output module;
    * @param Object block 
    */
-  async _scanBlockCallback(block) {
+  async scanBlockCallback(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
       const transactionsPromises = [];
       for (let i = 0; i < block.transactions.length; i += 1) {
         const txn = block.transactions[i];
-        transactionsPromises.push(this._scanTransaction(txn));
+        transactionsPromises.push(this.scanTransaction(txn));
       }
 
       const transactionsResult = [];
@@ -128,18 +128,38 @@ export default class JsonRpc {
 
 
   /**
-   * The main function that run scan all the blocks without the transaction - fastmode -.
+   * The main function that runs scan all the blocks without the transaction - fastmode -
    */
   async getLogsFromOneBlock() {
     const blockNumber = web3.toHex(this.currentBlock);
     const customRpc = initCustomRPCs();
-    return customRpc.getLogs({
-      address: this.addresses[0],
-      fromBlock: blockNumber,
-      toBlock: blockNumber,
-      topics: [] });
+    return this.addresses.map(address =>
+      customRpc.getLogs({
+        address,
+        fromBlock: blockNumber,
+        toBlock: blockNumber,
+        topics: [],
+      })
+    );
   }
 
+  /**
+   * This function getting the logs out per block 
+   * @param {*} block 
+   */
+  async scanFastMode(block) {
+    const arrayOflogs = await this.getLogsFromOneBlock();
+    const logs = arrayOflogs.reduce((a, b) => [...a, ...b], []);
+
+    const blockTransactionsWithLogsList =
+    this.getBlockAndTransactionLogsFormat(block, logs);
+
+    if (this.callback) {
+      blockTransactionsWithLogsList.forEach((transaction) => {
+        this.callback(transaction);
+      });
+    }
+  }
 
   /**
    * The main function that run scan all the blocks.
@@ -162,17 +182,9 @@ export default class JsonRpc {
             this.currentBlock, true);
 
           if (isFastMode) {
-            const logs = await this.getLogsFromOneBlock();
-            const blockTransactionsWithLogsList =
-            this.getBlockAndTransactionLogsFormat(block, logs);
-
-            if (this.callback) {
-              blockTransactionsWithLogsList.forEach((transaction) => {
-                this.callback(transaction);
-              });
-            }
+            await this.scanFastMode(block);
           } else {
-            await this._scanBlockCallback(block);
+            await this.scanBlockCallback(block);
           }
           this.currentBlock = parseInt(this.currentBlock, 10) + 1;
           logger.debug(`Current block number is ${this.currentBlock}`);
