@@ -20,6 +20,7 @@ export const defaultFromBlockNumber = 0;
 
 export const getWatchingConfigPath = () => 'src/.watch.yml';
 
+// TODO: Add error checks for each env variable
 export const networksById = {
   1: 'api',
   3: 'ropsten',

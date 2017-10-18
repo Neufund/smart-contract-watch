@@ -59,21 +59,14 @@ describe('JsonRpc', () => {
     web3.eth.getBlockNumber.restore();
   });
 
-  it('Should have 0 callbackExecutedCounter because there\'s no address to check', async () => {
+  it('should equal 0 no address given to check', async () => {
     addresses = [];
     jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, tranactionHandler);
     await jsonRpc.scanBlocks();
     expect(callbackExecutedCounter).to.equal(0);
   });
 
-  it('Should have 0 callbackExecutedCounter because block has no transactions', async () => {
-    addresses = ['0xa74476443119A942dE498590Fe1f2454d7D4aC0d'];
-    jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, tranactionHandler);
-    await jsonRpc.scanBlocks();
-    expect(callbackExecutedCounter).to.equal(0);
-  });
-
-  it('expectedIterations should equal callbackExecutedCounter with multiple addresses', async () => {
+  it('should return expected result when multiple addresses are given to check', async () => {
     addresses = ['0xa74476443119A942dE498590Fe1f2454d7D4aC0d', '0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c'];
     // 3 is the number of the times that this address has been shown in each block
     // +1 because the loop is checking the last block as well 
@@ -83,7 +76,7 @@ describe('JsonRpc', () => {
     expect(callbackExecutedCounter).to.equal(expectedIterations);
   });
 
-  it('expectedIterations should equal callbackExecutedCounter', async () => {
+  it('should return expected result one address is given to check ', async () => {
     addresses = ['0xa74476443119A942dE498590Fe1f2454d7D4aC0d'];
     // 3 is the number of the times that this address has been shown in each block
     // +1 because the loop is checking the last block as well 
@@ -92,4 +85,5 @@ describe('JsonRpc', () => {
     await jsonRpc.scanBlocks();
     expect(callbackExecutedCounter).to.equal(expectedIterations);
   });
+
 });

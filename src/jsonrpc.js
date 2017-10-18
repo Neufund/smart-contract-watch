@@ -4,6 +4,7 @@ import web3 from './web3/web3Provider';
 import logger from './logger';
 import { isInArray, isQueriedTransaction } from './utils';
 import { isAddress, validateBlockNumber } from './web3/utils';
+import initCustomRPCs from './web3/customRpc';
 
 export default class JsonRpc {
   /**
@@ -27,7 +28,6 @@ export default class JsonRpc {
       logger.info('Warning!: No callback function defined');
     }
   }
-
   /**
    * This will return the final data structure
    * for the transaction resopnse
@@ -44,11 +44,44 @@ export default class JsonRpc {
   }
 
   /**
+   * This will return the final data structure
+   * for the transaction resopnse
+   * @param string tx
+   * @param Object receipt
+   * @param Array logs
+   * @return object
+   */
+  getBlockAndTransactionLogsFormat(block, logs) {
+    const transactionLogs = {};
+    logs.forEach((log) => {
+      if (!Array.isArray(transactionLogs[log.transactionHash])) {
+        transactionLogs[log.transactionHash] = [];
+      }
+      transactionLogs[log.transactionHash].push(log);
+    });
+    const result = [];
+
+    block.transactions.filter(transaction =>
+      isInArray(this.addresses, transaction.to)
+    ).forEach((transaction) => {
+      const transactionObject = transaction;
+      if (typeof transactionLogs[transactionObject.hash] !== 'undefined') {
+        transactionObject.logs = transactionLogs[transactionObject.hash];
+      } else { transactionObject.logs = []; }
+
+      result.push(transactionObject);
+    });
+
+    return result;
+  }
+
+
+  /**
    * Async function that gets the transaction and transaction receipt
    * then get the logs out of the receipt transaction then execute the callback function
    * @param string txn
    */
-  async _scanTransaction(txn) {
+  async scanTransaction(txn) {
     const txnReceipts = await bluebird.promisify(this.web3Instance.getTransactionReceipt)(txn.hash);
     const logs = txnReceipts.logs ? txnReceipts.logs.filter(log => isInArray(this.addresses,
       log.address)) : [];
@@ -71,12 +104,12 @@ export default class JsonRpc {
    * send them to the output module;
    * @param Object block 
    */
-  async _scanBlockCallback(block) {
+  async scanBlockCallback(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
       const transactionsPromises = [];
       for (let i = 0; i < block.transactions.length; i += 1) {
         const txn = block.transactions[i];
-        transactionsPromises.push(this._scanTransaction(txn));
+        transactionsPromises.push(this.scanTransaction(txn));
       }
 
       const transactionsResult = [];
@@ -93,10 +126,45 @@ export default class JsonRpc {
     }
   }
 
+
+  /**
+   * The main function that runs scan all the blocks without the transaction - fastmode -
+   */
+  async getLogsFromOneBlock() {
+    const blockNumber = web3.toHex(this.currentBlock);
+    const customRpc = initCustomRPCs();
+    return this.addresses.map(address =>
+      customRpc.getLogs({
+        address,
+        fromBlock: blockNumber,
+        toBlock: blockNumber,
+        topics: [],
+      })
+    );
+  }
+
+  /**
+   * This function getting the logs out per block 
+   * @param {*} block 
+   */
+  async scanFastMode(block) {
+    const arrayOflogs = await this.getLogsFromOneBlock();
+    const logs = arrayOflogs.reduce((a, b) => [...a, ...b], []);
+
+    const blockTransactionsWithLogsList =
+    this.getBlockAndTransactionLogsFormat(block, logs);
+
+    if (this.callback) {
+      blockTransactionsWithLogsList.forEach((transaction) => {
+        this.callback(transaction);
+      });
+    }
+  }
+
   /**
    * The main function that run scan all the blocks.
    */
-  async scanBlocks() {
+  async scanBlocks(isFastMode = false) {
     let lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
     validateBlockNumber(lastBlockNumber, this.currentBlock);
     if (this.toBlock) {
@@ -112,8 +180,12 @@ export default class JsonRpc {
         } else {
           const block = await bluebird.promisify(this.web3Instance.getBlock)(
             this.currentBlock, true);
-          await this._scanBlockCallback(block);
 
+          if (isFastMode) {
+            await this.scanFastMode(block);
+          } else {
+            await this.scanBlockCallback(block);
+          }
           this.currentBlock = parseInt(this.currentBlock, 10) + 1;
           logger.debug(`Current block number is ${this.currentBlock}`);
         }
@@ -124,8 +196,8 @@ ${this.currentBlock}`);
           await bluebird.delay(2000);
         } else {
           throw new Error(e.message);
-        }
-      }
-    }
+        } // end if
+      } // end catch
+    } // end loop
   }
 }
