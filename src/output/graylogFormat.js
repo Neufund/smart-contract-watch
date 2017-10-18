@@ -1,7 +1,5 @@
 import web3Utils from '../web3/utils';
 import { networksById } from '../config';
-const GRAYLOG_ERROR = 'ERROR';
-const GRAYLOG_INFO = 'INFO';
 
 export default (transaction, decodedTransaction, decodedLogs) => ({
   networkId: networksById[web3Utils.getEtherNetworkId()],
@@ -20,5 +18,5 @@ export default (transaction, decodedTransaction, decodedLogs) => ({
   methodName: decodedTransaction.name,
   methodParameters: decodedTransaction.params,
   etherscanLink: `https://etherscan.io/tx/${transaction.hash}`,
-  events: decodedLogs,
+  events: decodedLogs.map(event => event),
 });

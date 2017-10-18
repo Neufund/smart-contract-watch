@@ -36,7 +36,7 @@ export default (data, type = 'terminal') => {
     case 'terminal':
       logger.info(`tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`);
       break;
-    case 'graylog':      
+    case 'graylog':
       logger.log('info', JSON.stringify(grayLogFromat(data.transaction,
         data.decodedInputDataResult, data.decodedLogs)));
       break;

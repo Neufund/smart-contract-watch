@@ -8,3 +8,4 @@ coverage/
 .vscode/
 src/.watch.yml
 coverage.lcov
+docker-compose.yml
