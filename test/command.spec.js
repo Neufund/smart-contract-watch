@@ -60,7 +60,7 @@ describe('Command read input from terminal', () => {
     const inputAddresses = '0x2c974b2d0ba1716e644c1fc59982a89ddd2ff724,0xa74476443119A942dE498590Fe1f2454d7D4aC0d';
     const from = 4240705;
     const to = 4240720;
-
+    const quickMode = false;
     process.argv = process.argv.concat(['-f',
       from,
       '-t',
@@ -70,13 +70,14 @@ describe('Command read input from terminal', () => {
 
     const program = command(watchPath, lastBlockNumber);
     const addresses = ['0x2c974b2d0ba1716e644c1fc59982a89ddd2ff724', '0xa74476443119A942dE498590Fe1f2454d7D4aC0d'];
-    expect(program).deep.equal({ from, to, addresses });
+    expect(program).deep.equal({ from, to, addresses , quickMode });
   });
 
   it('Should assign the values correctly', () => {
     const inputAddresses = '0x2c974b2d0ba1716e644c1fc59982a89ddd2ff724';
     const from = 4240705;
     const to = 4240720;
+    const quickMode = false;
 
     process.argv = process.argv.concat(['-f',
       from,
@@ -88,7 +89,7 @@ describe('Command read input from terminal', () => {
     const program = command(watchPath, lastBlockNumber);
 
     const addresses = ['0x2c974b2d0ba1716e644c1fc59982a89ddd2ff724'];
-    expect(program).deep.equal({ from, to, addresses });
+    expect(program).deep.equal({ from, to, addresses, quickMode });
   });
 });
 
@@ -118,8 +119,9 @@ describe('Command read input config file', () => {
     const from = 3917867;
     const to = 4240720;
     const addresses = ['0xda7c27c04f66842faf20644814b644e25e1766ea'];
-
-    expect(program).deep.equal({ from, to, addresses });
+    const quickMode = false;
+    
+    expect(program).deep.equal({ from, to, addresses, quickMode });
   });
 
   it('Should return the from value from the input and the rest from the config file', () => {
@@ -132,9 +134,11 @@ describe('Command read input config file', () => {
     // expected result
     const from = 3917869;
     const to = 4240720;
+    const quickMode = false;
+
     const addresses = ['0xda7c27c04f66842faf20644814b644e25e1766ea'];
 
-    expect(program).deep.equal({ from, to, addresses });
+    expect(program).deep.equal({ from, to, addresses, quickMode });
   });
 
   it('Should return the addresses value from the input and the rest from the config file', () => {
@@ -148,8 +152,9 @@ describe('Command read input config file', () => {
     const from = 3917867;
     const to = 4240720;
     const addresses = ['0x91c94bee75786fbbfdcfefba1102b68f48a002f4'];
+    const quickMode = false;
 
-    expect(program).deep.equal({ from, to, addresses });
+    expect(program).deep.equal({ from, to, addresses, quickMode });
   });
 
   it('Should fail when there\'s no address in the config or in the input', () => {

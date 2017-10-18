@@ -1,6 +1,19 @@
 import web3Utils from '../web3/utils';
 import { networksById } from '../config';
 
+const formatLogs = logs =>
+  logs.map((log) => {
+    let eventText = `${log.name}(`;
+    log.events.forEach((i, idx, events) => {
+      eventText += `${events[idx].name}=${events[idx].value}`;
+      if (idx !== events.length - 1) {
+        eventText += ',';
+      }
+    });
+    eventText += ')';
+    return eventText;
+  });
+
 export default (transaction, decodedTransaction, decodedLogs) => ({
   networkId: networksById[web3Utils.getEtherNetworkId()],
   blockHash: transaction.blockHash,
@@ -18,5 +31,5 @@ export default (transaction, decodedTransaction, decodedLogs) => ({
   methodName: decodedTransaction.name,
   methodParameters: decodedTransaction.params,
   etherscanLink: `https://etherscan.io/tx/${transaction.hash}`,
-  events: decodedLogs.map(event => event),
+  events: formatLogs(decodedLogs),
 });

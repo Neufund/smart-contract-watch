@@ -24,6 +24,7 @@ export const getOutputModel = () => process.env.OUTPUT_TYPE;
 export const graylogConfig = { host: process.env.GRAYLOG_HOSTNAME,
   port: process.env.GRAYLOG_PORT };
 
+// TODO: Add error checks for each env variable
 export const networksById = {
   1: 'api',
   3: 'ropsten',
