@@ -1,23 +1,22 @@
 import { expect } from 'chai';
-import { getSocketPortNumber, getLogLevel, getRPCNode } from '../src/config';
+import { getEnv } from '../src/config';
 
-describe('getSocketPortNumber', () => {
-  it('should return port number from .env file', () => {
-    const portNumber = getSocketPortNumber();
-    expect(portNumber).to.be.a('number').above(0).and.satisfy(Number.isInteger);
+describe('getEnv', () => {
+  let processEnv;
+  beforeEach(() => {
+    processEnv = process.env
+    process.env.TESTING_KEY = "TEST_VALUE";
   });
-});
-
-describe('getLogLevel', () => {
-  it('should return port number from .env file', () => {
-    const portNumber = getLogLevel();
-    expect(portNumber).to.be.a('string');
+  afterEach(() => {
+    process.env = processEnv;    
   });
-});
 
-describe('getRPCNode', () => {
-  it('should return port number from .env file', () => {
-    const portNumber = getRPCNode();
-    expect(portNumber).to.be.a('string');
+  it('should return TEST_VALUE', () => {
+    const value = getEnv('TESTING_KEY');
+    expect(value).to.equal('TEST_VALUE');
+  });
+
+  it('should rase Error', () => {    
+    expect(() => getEnv('NOT_EXISTING_KEY')).to.throw('Enviroment variable is not eixsts');
   });
 });

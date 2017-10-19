@@ -1,7 +1,7 @@
 import bluebird from 'bluebird';
 import { defaultBlockNumber, defaultFromBlockNumber } from './config';
 import web3 from './web3/web3Provider';
-import logger from './logger';
+import logger, { logError } from './logger';
 import { isInArray, isQueriedTransaction } from './utils';
 import { isAddress, validateBlockNumber } from './web3/utils';
 import initCustomRPCs from './web3/customRpc';
@@ -104,7 +104,7 @@ export default class JsonRpc {
    * send them to the output module;
    * @param Object block 
    */
-  async scanBlockCallback(block) {
+  async scanSlowMode(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
       const transactionsPromises = [];
       for (let i = 0; i < block.transactions.length; i += 1) {
@@ -114,8 +114,13 @@ export default class JsonRpc {
 
       const transactionsResult = [];
       for (let i = 0; i < transactionsPromises.length; i += 1) {
-        const singleTransactionResult = await transactionsPromises[i];
-        if (singleTransactionResult) { transactionsResult.push(singleTransactionResult); }
+        try {
+          const singleTransactionResult = await transactionsPromises[i];
+          if (singleTransactionResult) { transactionsResult.push(singleTransactionResult); }
+        } catch (error) {
+          logError(error, "Couldn't handle the transaction because the RPC node is down",
+            false);
+        }
       }
 
       if (this.callback) {
@@ -183,15 +188,16 @@ export default class JsonRpc {
           if (isFastMode) {
             await this.scanFastMode(block);
           } else {
-            await this.scanBlockCallback(block);
+            await this.scanSlowMode(block);
           }
           this.currentBlock = parseInt(this.currentBlock, 10) + 1;
           logger.debug(`Current block number is ${this.currentBlock}`);
         }
       } catch (e) {
         if (e.message === 'Invalid JSON RPC response: ""') {
-          logger.error(`Network error ocurar, retry after 2 seconds, from block number \
-${this.currentBlock}`);
+          logError(e, `Network error ocurar,
+           retry after 2 seconds, from block number \
+          ${this.currentBlock}`, false);
           await bluebird.delay(2000);
         } else {
           throw new Error(e.message);

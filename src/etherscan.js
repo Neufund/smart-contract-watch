@@ -1,7 +1,7 @@
 import rp from 'request-promise';
 import fs from 'fs';
 import path from 'path';
-import { getAccessToken, networksById } from './config';
+import { getEnv, networksById } from './config';
 import web3Utils from './web3/utils';
 
 
@@ -41,7 +41,7 @@ const scrapeABI = async (address) => {
     qs: {
       action: 'getabi',
       address,
-      access_token: getAccessToken(),
+      access_token: getEnv('ACCESS_TOKEN'),
     },
     headers: {
       'User-Agent': 'Request-Promise',
