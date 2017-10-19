@@ -5,9 +5,9 @@ import Decoder from './decoder';
 import JsonRpc from './jsonrpc';
 import { getABI } from './etherscan';
 import output from './output';
+import { getWatchingConfigPath, getOutputModel } from './config';
 import web3 from './web3/web3Provider';
 import { isContractCreationTransaction } from './utils';
-import { getWatchingConfigPath } from './config';
 
 /**
  *
@@ -50,7 +50,7 @@ const transactionHandler = async (transaction) => {
       logger.error(`txHash: ${transaction.hash} ${error.message}`);
     }
   }
-  output({ transaction, decodedInputDataResult, decodedLogs });
+  output({ transaction, decodedInputDataResult, decodedLogs }, getOutputModel());
 };
 
 

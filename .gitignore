@@ -5,3 +5,7 @@ node_modules/
 contracts/
 .nyc_output
 coverage/
+.vscode/
+src/.watch.yml
+coverage.lcov
+docker-compose.yml

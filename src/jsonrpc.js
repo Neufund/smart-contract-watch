@@ -150,7 +150,6 @@ export default class JsonRpc {
   async scanFastMode(block) {
     const arrayOflogs = await this.getLogsFromOneBlock();
     const logs = arrayOflogs.reduce((a, b) => [...a, ...b], []);
-
     const blockTransactionsWithLogsList =
     this.getBlockAndTransactionLogsFormat(block, logs);
 
