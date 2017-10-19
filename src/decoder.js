@@ -1,6 +1,10 @@
 import SolidityCoder from 'web3/lib/solidity/coder';
 import web3 from './web3/web3Provider';
 
+/**This is based on Consynses ABI-decoder
+ * https://github.com/ConsenSys/abi-decoder
+ */
+
 export default class Decoder {
   /**
    * Initialize class local variables
