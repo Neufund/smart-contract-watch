@@ -1,11 +1,11 @@
 import bluebird from 'bluebird';
-import logger from './logger';
+import logger, { logError } from './logger';
 import command from './command';
 import Decoder from './decoder';
 import JsonRpc from './jsonrpc';
 import { getABI } from './etherscan';
 import output from './output';
-import { getWatchingConfigPath, getOutputModel } from './config';
+import { watchingConfigPath, getEnv } from './config';
 import web3 from './web3/web3Provider';
 import { isContractCreationTransaction } from './utils';
 
@@ -50,7 +50,7 @@ const transactionHandler = async (transaction) => {
       logger.error(`txHash: ${transaction.hash} ${error.message}`);
     }
   }
-  output({ transaction, decodedInputDataResult, decodedLogs }, getOutputModel());
+  output({ transaction, decodedInputDataResult, decodedLogs }, getEnv('OUTPUT_TYPE'));
 };
 
 
@@ -60,7 +60,7 @@ const transactionHandler = async (transaction) => {
 const main = async () => {
   const lastBlockNumber = await bluebird.promisify(web3.eth.getBlockNumber)();
 
-  const { from, to, addresses, quickMode } = command(getWatchingConfigPath(), lastBlockNumber);
+  const { from, to, addresses, quickMode } = command(watchingConfigPath, lastBlockNumber);
   logger.debug('Start process');
 
   const PromisifiedAbiObjects = addresses.map(async address => (
@@ -77,11 +77,10 @@ const main = async () => {
     await jsonRpc.scanBlocks(quickMode);
     logger.info('Finish scanning all the blocks');
   } catch (e) {
-    logger.log('verbose', e.stack || e);
+    logError(e);
   }
 };
 
 main().catch((e) => {
-  logger.error(`"Main catch ${e.message}`);
-  logger.log('verbose', e.stack || e);
+  logError(e);
 });
