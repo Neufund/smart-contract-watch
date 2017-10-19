@@ -1,8 +1,9 @@
 import web3Utils from '../web3/utils';
 import { networksById } from '../config';
 
-const formatLogs = logs =>
-  logs.map((log) => {
+const formatLogs = logs => {
+  if(!logs) return [];
+  return logs.map((log) => {
     let eventText = `${log.name}(`;
     log.events.forEach((i, idx, events) => {
       eventText += `${events[idx].name}=${events[idx].value}`;
@@ -13,7 +14,7 @@ const formatLogs = logs =>
     eventText += ')';
     return eventText;
   });
-
+}
 export default (transaction, decodedTransaction, decodedLogs) => ({
   networkId: networksById[web3Utils.getEtherNetworkId()],
   blockHash: transaction.blockHash,
