@@ -77,7 +77,7 @@ const main = async () => {
     await jsonRpc.scanBlocks(quickMode);
     logger.info('Finish scanning all the blocks');
   } catch (e) {
-    logger.error(JSON.stringify({ type: 'error', message: e.message }), { a: 1 });
+    logger.error(JSON.stringify({ type: 'error', message: e.message }));
   }
 };
 
