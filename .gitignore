@@ -6,6 +6,6 @@ contracts/
 .nyc_output
 coverage/
 .vscode/
-src/.watch.yml
+.watch.yml
 coverage.lcov
 docker-compose.yml

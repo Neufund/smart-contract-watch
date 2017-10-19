@@ -77,11 +77,10 @@ const main = async () => {
     await jsonRpc.scanBlocks(quickMode);
     logger.info('Finish scanning all the blocks');
   } catch (e) {
-    logger.log('verbose', e.stack || e);
+    logger.error(JSON.stringify({ type: 'error', message: e.message }), { a: 1 });
   }
 };
 
 main().catch((e) => {
-  logger.error(`"Main catch ${e.message}`);
-  logger.log('verbose', e.stack || e);
+  logger.error(JSON.stringify({ type: 'error', message: e.message }));
 });
