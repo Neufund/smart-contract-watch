@@ -1,3 +1,4 @@
+import fs from 'fs';
 import bluebird from 'bluebird';
 import { defaultBlockNumber, defaultFromBlockNumber } from './config';
 import web3 from './web3/web3Provider';
@@ -14,7 +15,7 @@ export default class JsonRpc {
    * @param int toBlock
    * @param function callback
    */
-  constructor(addresses, fromBlock, toBlock, callback = null) {
+  constructor(addresses, fromBlock, toBlock, lastBlockNumberFilePath = null, callback = null) {
     this.addresses = addresses.map((address) => {
       if (!isAddress(address)) { throw new Error(`${address} is not valid address`); }
       return address.toLowerCase();
@@ -27,6 +28,7 @@ export default class JsonRpc {
     if (!callback) {
       logger.info('Warning!: No callback function defined');
     }
+    this.lastBlockNumberFilePath = lastBlockNumberFilePath;
   }
   /**
    * This will return the final data structure
@@ -192,6 +194,11 @@ export default class JsonRpc {
           }
           this.currentBlock = parseInt(this.currentBlock, 10) + 1;
           logger.debug(`Current block number is ${this.currentBlock}`);
+
+          if (this.lastBlockNumberFilePath) {
+            fs.writeFileSync(this.lastBlockNumberFilePath,
+              JSON.stringify({ blockNumber: this.currentBlock }));
+          }
         }
       } catch (e) {
         if (e.message === 'Invalid JSON RPC response: ""') {

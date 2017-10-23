@@ -35,7 +35,7 @@ describe('JsonRpc', () => {
   let blockFrom;
   let blockTo;
   let addresses;
-
+  let lastBlockNumberFilePath = null;
   beforeEach(function () {
     blockFrom = 3578800;
     blockTo = 3578810;
@@ -61,7 +61,7 @@ describe('JsonRpc', () => {
 
   it('should equal 0 no address given to check', async () => {
     addresses = [];
-    jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, tranactionHandler);
+    jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, lastBlockNumberFilePath, tranactionHandler);
     await jsonRpc.scanBlocks();
     expect(callbackExecutedCounter).to.equal(0);
   });
@@ -71,7 +71,7 @@ describe('JsonRpc', () => {
     // 3 is the number of the times that this address has been shown in each block
     // +1 because the loop is checking the last block as well 
     const expectedIterations = 3 * ((blockTo - blockFrom) + 1);
-    jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, tranactionHandler);
+    jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, lastBlockNumberFilePath, tranactionHandler);
     await jsonRpc.scanBlocks();
     expect(callbackExecutedCounter).to.equal(expectedIterations);
   });
@@ -81,7 +81,7 @@ describe('JsonRpc', () => {
     // 3 is the number of the times that this address has been shown in each block
     // +1 because the loop is checking the last block as well 
     const expectedIterations = 3 * ((blockTo - blockFrom) + 1);
-    jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, tranactionHandler);
+    jsonRpc = new JsonRpc(addresses, blockFrom, blockTo, lastBlockNumberFilePath, tranactionHandler);
     await jsonRpc.scanBlocks();
     expect(callbackExecutedCounter).to.equal(expectedIterations);
   });

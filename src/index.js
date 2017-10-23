@@ -60,7 +60,8 @@ const transactionHandler = async (transaction) => {
 const main = async () => {
   const lastBlockNumber = await bluebird.promisify(web3.eth.getBlockNumber)();
 
-  const { from, to, addresses, quickMode } = command(watchingConfigPath, lastBlockNumber);
+  const { from, to, addresses, quickMode,
+    lastBlockNumberFilePath } = command(watchingConfigPath, lastBlockNumber);
   logger.debug('Start process');
 
   const PromisifiedAbiObjects = addresses.map(async address => (
@@ -72,7 +73,7 @@ const main = async () => {
   });
 
   try {
-    const jsonRpc = new JsonRpc(addresses, from, to, transactionHandler);
+    const jsonRpc = new JsonRpc(addresses, from, to, lastBlockNumberFilePath, transactionHandler);
 
     await jsonRpc.scanBlocks(quickMode);
     logger.info('Finish scanning all the blocks');

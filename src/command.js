@@ -1,4 +1,6 @@
 import program from 'commander';
+import fs from 'fs';
+import path from 'path';
 import YAML from 'yamljs';
 import { defaultBlockNumber } from './config';
 import { isAddress, validateBlockNumber } from './web3/utils';
@@ -18,15 +20,36 @@ export default (filePath, lastBlockNumber) => {
     .option('-a, --addresses <n>', 'List of address', list)
     .option('-f, --from [n]', 'From block', typeof watchConfig.from !== 'undefined' ? watchConfig.from : defaultBlockNumber)
     .option('-t, --to [n]', 'To block', typeof watchConfig.to !== 'undefined' ? watchConfig.to : defaultBlockNumber)
-    .option('-q, --quick [n]', 'Quick Mode', typeof watchConfig.quick !== 'undefined' ? watchConfig.quick : false);
+    .option('-q, --quick [n]', 'Quick Mode', typeof watchConfig.quick !== 'undefined' ? watchConfig.quick : false)
+    .option('-s, --save-state [n]', 'Save state', typeof watchConfig.saveState !== 'undefined' ? watchConfig.saveState : null);
 
   program.parse(process.argv);
   if (typeof program === 'undefined') { throw new Error('No args are specifed in the command or in the .watch.yml file'); }
 
   let addresses = null;
-  const from = program.from;
+  let from = program.from;
   const to = program.to;
   const quickMode = program.quick;
+  const saveStatePath = program.saveState;
+  let lastBlockNumberFilePath = null;
+
+  if (saveStatePath) {
+    lastBlockNumberFilePath = path.join(saveStatePath, 'last-block-number.json');
+
+    // If directory is not exist
+    if (!fs.existsSync(saveStatePath)) {
+      fs.mkdirSync(saveStatePath);
+    }
+
+    // If file is not exist
+    if (!fs.existsSync(lastBlockNumberFilePath)) {
+      fs.writeFileSync(lastBlockNumberFilePath, JSON.stringify({ blockNumber: from }));
+    } else {
+      const lastBlockNumberJson = JSON.parse(fs.readFileSync(lastBlockNumberFilePath,
+        { encoding: 'utf8' }));
+      from = lastBlockNumberJson.blockNumber;
+    }
+  }
 
   if (typeof program.addresses !== 'undefined') {
     addresses = program.addresses;
@@ -49,5 +72,5 @@ export default (filePath, lastBlockNumber) => {
      be larger than "${to}"`);
   }
 
-  return { from, to, addresses, quickMode };
+  return { from, to, addresses, quickMode, lastBlockNumberFilePath };
 };
