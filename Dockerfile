@@ -1,4 +1,4 @@
-FROM node:7
+FROM node:7-alpine
 RUN apt-get update
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash
 WORKDIR /app
