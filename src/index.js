@@ -69,7 +69,7 @@ const main = async () => {
   ));
 
   (await Promise.all(PromisifiedAbiObjects)).forEach((object) => {
-    addressAbiMap[object.address] = new Decoder(object.abi);
+    addressAbiMap[object.address.toLowerCase()] = new Decoder(object.abi);
   });
 
   try {
