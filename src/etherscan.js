@@ -35,7 +35,11 @@ const validateResponse = (response) => {
 const scrapeABI = async (address) => {
   const networkID = web3Utils.getEtherNetworkId();
 
-  if (!networksById[networkID]) throw new Error('Network not supported!. Etherscan only supports, Mainnet, ropsten, rinkeby, kovan');
+  if (!networksById[networkID]) {
+    throw new Error('Network not supported!. Etherscan only supports, Mainnet, ropsten, rinkeby, kovan' +
+  'If you are connected with a private chain please copy the smart contracts ABI into the contracts folder with its address as its name'
++ 'for example 0xda7c27c04f66842faf20644814b644e25e1766ea.json');
+  }
   const options = {
     uri: `https://${networksById[networkID]}.etherscan.io/api?module=contract`,
     qs: {
