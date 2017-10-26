@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 /**
  * @param Array array
  * @param bool element
@@ -44,3 +46,9 @@ export const isQueriedTransaction = ({ txn, txnReceipts, logs, addresses }) =>
   !!((isRegularQueriedTransaction({ QueriedAddress: txn.to, addresses })
     || isContractCreationQueriedTransaction(txnReceipts, addresses))
       || isLogsQueriedTransaction({ logCount: logs.length }));
+
+/**
+ * check if path is exists or not
+ * @param string path 
+ */
+export const isPathExist = path => fs.existsSync(path);

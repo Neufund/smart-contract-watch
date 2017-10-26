@@ -1,0 +1,12 @@
+version: '2'
+services:
+  logger:
+    image: <IMAGE_NAME>
+    volumes:
+      - "./:/usr/src/app"
+    command: "yarn start"
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://<IP_ADDRESS>:<PORT_NUMBER>"
+        tag: <TAG_NAME>
