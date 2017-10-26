@@ -19,10 +19,15 @@ const logger = new (winston.Logger)({
  * @param {*} customMessage 
  */
 export const logError = (error, customMessage = null, isStack = true) => {
-  logger.error(JSON.stringify({ type: 'Error',
-    message: error.message,
-    stack: isStack ? error.stack : null,
-    customMessage }));
+  if (getEnv('OUTPUT_TYPE') === 'terminal') {
+    logger.error(error.message);
+    logger.error(error.stack);
+  } else {
+    logger.error(JSON.stringify({ type: 'Error',
+      message: error.message,
+      stack: isStack ? error.stack : null,
+      customMessage }));
+  }
 };
 
 export default logger;
