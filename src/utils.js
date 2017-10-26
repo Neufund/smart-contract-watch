@@ -51,4 +51,4 @@ export const isQueriedTransaction = ({ txn, txnReceipts, logs, addresses }) =>
  * check if path is exists or not
  * @param string path 
  */
-export const isPathExist = (path) => fs.existsSync(path)
+export const isPathExist = path => fs.existsSync(path);
