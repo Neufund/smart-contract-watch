@@ -4,6 +4,7 @@ import path from 'path';
 import YAML from 'yamljs';
 import { defaultBlockNumber } from './config';
 import { isAddress, validateBlockNumber } from './web3/utils';
+import { isPathExist } from './utils';
 
 /**
  * convert string to array
@@ -36,13 +37,11 @@ export default (filePath, lastBlockNumber) => {
   if (saveStatePath) {
     lastBlockNumberFilePath = path.join(saveStatePath, 'last-block-number.json');
 
-    // If directory is not exist
-    if (!fs.existsSync(saveStatePath)) {
+    if (!isPathExist(saveStatePath)) {
       fs.mkdirSync(saveStatePath);
     }
 
-    // If file is not exist
-    if (!fs.existsSync(lastBlockNumberFilePath)) {
+    if (!isPathExist(lastBlockNumberFilePath)) {
       fs.writeFileSync(lastBlockNumberFilePath, JSON.stringify({ blockNumber: from }));
     } else {
       const lastBlockNumberJson = JSON.parse(fs.readFileSync(lastBlockNumberFilePath,
