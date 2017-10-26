@@ -195,7 +195,7 @@ export default class JsonRpc {
           this.currentBlock = parseInt(this.currentBlock, 10) + 1;
           logger.debug(`Current block number is ${this.currentBlock}`);
 
-          // @TODO: Move this writing outside this module
+          // @TODO: Move file writing outside of this module
           if (this.lastBlockNumberFilePath) {
             fs.writeFileSync(this.lastBlockNumberFilePath,
               JSON.stringify({ blockNumber: this.currentBlock }));
