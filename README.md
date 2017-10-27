@@ -12,7 +12,7 @@ Additionally Smart Contract Watch currently has two output modes:
 - **Terminal output**: all marked transactions are outputted directly to the screen, in
 
   `[#address] function(param1,param2,...) log(event1,event2,......)`
-- **Graylog output**: All transaction are sent through socket IO to Graylog after   formatting the results. communication to graylog is done through the Docker conatainer.
+- **Graylog output**: All transaction are to Graylog after   formatting the results. communication to graylog is done through the Docker conatainer.
 
 ### Input
 The smart contract watch can take parameters in two diffrent modes
@@ -22,15 +22,16 @@ The smart contract watch can take parameters in two diffrent modes
 As a CLI tool you can run
 `yarn run` and then insert all needed parameters
 ##### Parameters:
--`-a` `[#address1,#address2,...]` The only mandatory field if a config file is not provided, this represents an array of addresses to monitory.
+`-a` `[#address1,#address2,...]` The only mandatory field if a config file is not provided, this represents an array of addresses to monitory.
 
-`-f` `Blocknumber` Represents the from blocknumber if unspecified smart-contract-watch will start scanning from the first block number
+`-f` `Blocknumber` Represents the from blocknumber if unspecified smart-contract-watch will start scanning from the first block number.
 
 `-t` `Blocknumber` Represents the ending blocknumber where the smart-contract-watch will stop working when reached if left blank the smart-contract-watch will continue waiting for new blocking and scanning until manually exited.
 
-`-q` Quick mode: Activates quick mode
+`-q` Quick mode: Activates quick mode.
 
-`-s` Save state mode: Saves the last scanned block when service restarts again
+`-s` Save state mode: Saves the last scanned block when service restarts again. In order to use this you must include a store directory
+ex, `-s /DIRECTORY` or `--save-state /DIRECTORY`.
 #### Config file
 Smart Contract watch supports configration files. You must insert all your configration in a `.watch.yml` file. You can mix between both CLI and config file by filling only some of the needed fields, take into account that CLI overides config file.
 
