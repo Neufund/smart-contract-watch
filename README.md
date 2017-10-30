@@ -1,9 +1,41 @@
 # smart-contract-watch
 [![Build Status](https://travis-ci.org/Neufund/smart-contract-watch.svg?branch=master)](https://travis-ci.org/Neufund/smart-contract-watch) [![codecov](https://codecov.io/gh/Neufund/smart-contract-watch/branch/master/graph/badge.svg)](https://codecov.io/gh/Neufund/smart-contract-watch)
 
-A tool that monitors smart contracts activity and interactions by scanning transactions in the blockchain. Currently all marked transactions are outputted directly to the screen, in
+A tool that monitors smart contracts activity and interactions. It can be considered as a local blockchain explorer that runs locally in your server or machine. This processes is done by scanning transactions in the blockchain using diffrent RPC calls.
 
-`[#address] function(param1,param2,...) log(event1,event2,......)`
+Currently the smart-contract-watch can run in two modes:
+- **Default mode**: the tool scans the blockchain block by block, transaction by transaction and log by log for any activity related to the monitored smart contracts. This is a slow processes and heavy on the node due to the high number of `eth_getTransactionByHash` and `eth_getTransactionReceipt` RPC requests. However, this approach gives the opportunity to add more features in the future like instrumenting the EVM or debugging transactions.
+
+- **Fast mode**: the tool gets all needed information from a whole block by only sending two RPC calls `eth_getBlockByHash`, `get_logs`. This proves to be more efficient and faster for direct scanning.
+
+Additionally Smart Contract Watch currently has two output modes:
+- **Terminal output**: all marked transactions are outputted directly to the screen, in
+
+  `[#address] function(param1,param2,...) log(event1,event2,......)`
+- **Graylog output**: All transaction are to Graylog after   formatting the results. communication to graylog is done through the Docker conatainer.
+
+### Input
+The smart contract watch can take parameters in two diffrent modes
+  - CLI
+  - `.watch.yml` Config file
+#### CLI
+As a CLI tool you can run
+`yarn run` and then insert all needed parameters
+##### Parameters:
+`-a` `[#address1,#address2,...]` The only mandatory field if a config file is not provided, this represents an array of addresses to monitory.
+
+`-f` `Blocknumber` Represents the from blocknumber if unspecified smart-contract-watch will start scanning from the first block number.
+
+`-t` `Blocknumber` Represents the ending blocknumber where the smart-contract-watch will stop working when reached if left blank the smart-contract-watch will continue waiting for new blocking and scanning until manually exited.
+
+`-q` Quick mode: Activates quick mode.
+
+`-s` Save state mode: Saves the last scanned block when service restarts again. In order to use this you must include a store directory
+ex, `-s /DIRECTORY` or `--save-state /DIRECTORY`.
+#### Config file
+Smart Contract watch supports configration files. You must insert all your configration in a `.watch.yml` file. You can mix between both CLI and config file by filling only some of the needed fields, take into account that CLI overides config file.
+
+
 
 ## How it works
 Smart-contract-watch reports two different activities conducted by a smart contract using [getTransaction](https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethgettransaction), [getTransactionReceipt](https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethgettransactionreceipt)
@@ -24,10 +56,3 @@ example:
 ### Tests
 `yarn test`
 ### Flags
-`-a` `[#address1,#address2,...]` The only mandatory field if a config file is not provided, this represents an array of addresses to monitory.
-
-`-f` `Blocknumber` Represents the from blocknumber if unspecified smart-contract-watch will start scanning from the first block number
-
-`-t` `Blocknumber` Represents the ending blocknumber where the smart-contract-watch will stop working when reached if left blank the smart-contract-watch will continue waiting for new blocking and scanning until manually exited.
-
-`-c` `./config_file_path` Specify a config file, if a config file is specified smart-contract-watch will take all config settings from this config file and immediately starts running.
