@@ -1,8 +1,9 @@
 import rp from 'request-promise';
 import fs from 'fs';
 import path from 'path';
-import { getEnv, networksById } from './config';
+import { networksById } from './config';
 import web3Utils from './web3/utils';
+import command from './command';
 
 
 const expectedResponse = {
@@ -45,7 +46,7 @@ const scrapeABI = async (address) => {
     qs: {
       action: 'getabi',
       address,
-      access_token: getEnv('ACCESS_TOKEN'),
+      access_token: command().accessToken,
     },
     headers: {
       'User-Agent': 'Request-Promise',

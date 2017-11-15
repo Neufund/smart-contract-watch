@@ -16,7 +16,7 @@ describe('getEnv', () => {
     expect(value).to.equal('TEST_VALUE');
   });
 
-  it('should rase Error', () => {
-    expect(() => getEnv('NOT_EXISTING_KEY')).to.throw('Environment variable does not exist');
+  it('should return undefined', () => {
+    expect(getEnv('NOT_EXISTING_KEY')).to.equal(undefined);
   });
 });

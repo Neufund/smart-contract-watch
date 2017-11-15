@@ -1,13 +1,13 @@
 import Web3 from 'web3';
-import { getEnv } from '../config';
+import command from '../command';
 
 let web3;
 const getWeb3 = () => {
   if (typeof web3 !== 'undefined') {
     web3 = new Web3(web3.currentProvider);
   } else {
-    // set the provider you want from Web3.providers
-    web3 = new Web3(new Web3.providers.HttpProvider(getEnv('RPC_URL')));
+    // TODO: remove this dependancy on ENV
+    web3 = new Web3(new Web3.providers.HttpProvider(command().nodeUrl));
   }
   return web3;
 };
