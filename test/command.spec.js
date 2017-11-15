@@ -196,10 +196,10 @@ describe('Test lastBlockNumberFilePath', () => {
 
 
     if (fs.existsSync(testedPath)) {
-      fs.unlink(testedPath);
+      fs.unlinkSync(testedPath);
     }
     if (fs.existsSync(testDirectory)) {
-      fs.rmdir(testDirectory);
+      fs.rmdirSync(testDirectory);
     }
   });
 
@@ -207,10 +207,10 @@ describe('Test lastBlockNumberFilePath', () => {
     process.argv = processArgv;
 
     if (fs.existsSync(testedPath)) {
-      fs.unlink(testedPath);
+      fs.unlinkSync(testedPath);
     }
     if (fs.existsSync(testDirectory)) {
-      fs.rmdir(testDirectory);
+      fs.rmdirSync(testDirectory);
     }
   });
 
@@ -221,14 +221,16 @@ describe('Test lastBlockNumberFilePath', () => {
       '-s',
       testDirectory,
     ]);
-
+    try {
     // test when file is not exists
-    command(watchPath, lastBlockNumber);
-    expect(fs.existsSync(testedPath)).to.be.equal(true);
+      command(watchPath, lastBlockNumber);
+      expect(fs.existsSync(testedPath)).to.be.equal(true);
 
-    // test when file Already exists
-    command(watchPath, lastBlockNumber);
-    expect(fs.existsSync(testedPath)).to.be.equal(true);
+      // test when file Already exists
+      command(watchPath, lastBlockNumber);
+      expect(fs.existsSync(testedPath)).to.be.equal(true);
+    } catch (e) {
+      console.log(e);
+    }
   });
 });
-
