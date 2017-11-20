@@ -19,3 +19,5 @@ export const networksById = {
   4: 'rinkeby',
   42: 'kovan',
 };
+
+export const waitingNumberInMilliseconds = 10000;
