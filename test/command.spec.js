@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import web3 from '../src/web3/web3Provider';
 import fs from 'fs';
 import path from 'path';
+import web3 from '../src/web3/web3Provider';
 
 let command;
 const lastBlockNumber = Number.MAX_SAFE_INTEGER;
@@ -18,8 +18,11 @@ describe('Command read input from terminal', () => {
     process.argv = [
       'node',
       'dist'];
+    // eslint-disable-next-line global-require
     delete require.cache[require.resolve('commander')];
+    // eslint-disable-next-line global-require
     delete require.cache[require.resolve('../src/command')];
+    // eslint-disable-next-line global-require
     command = require('../src/command').default;
     sinon.stub(web3.eth, 'getBlockNumber').withArgs().callsFake(getBlockNumber);
   });
@@ -73,7 +76,7 @@ describe('Command read input from terminal', () => {
 
     const program = command(watchPath, lastBlockNumber);
     const addresses = ['0x2c974b2d0ba1716e644c1fc59982a89ddd2ff724', '0xa74476443119A942dE498590Fe1f2454d7D4aC0d'];
-    expect(program).deep.equal({ from, to, addresses , quickMode, lastBlockNumberFilePath });
+    expect(program).deep.equal({ from, to, addresses, quickMode, lastBlockNumberFilePath });
   });
 
   it('Should assign the values correctly', () => {
@@ -104,8 +107,11 @@ describe('Command read input config file', () => {
     process.argv = [
       'node',
       'dist'];
+    // eslint-disable-next-line global-require
     delete require.cache[require.resolve('commander')];
+    // eslint-disable-next-line global-require
     delete require.cache[require.resolve('../src/command')];
+    // eslint-disable-next-line global-require
     command = require('../src/command').default;
     sinon.stub(web3.eth, 'getBlockNumber').withArgs().callsFake(getBlockNumber);
   });
@@ -165,54 +171,55 @@ describe('Command read input config file', () => {
   });
 
   it('Should fail when there\'s no address in the config or in the input', () => {
-    const path = 'test/mockedData/.watch.empty.yml';
-    expect(() => command(path, lastBlockNumber)).to.throw('-a or --address is required');
+    const filePath = 'test/mockedData/.watch.empty.yml';
+    expect(() => command(filePath, lastBlockNumber)).to.throw('-a or --address is required');
   });
 });
 
 
 describe('Test lastBlockNumberFilePath', () => {
   let processArgv;
-  const testDirectory = '/tmp/block-number-testing'
-  const testedPath = path.join(testDirectory, `last-block-number.json`);
+  const testDirectory = '/tmp/block-number-testing';
+  const testedPath = path.join(testDirectory, 'last-block-number.json');
 
   beforeEach(() => {
     processArgv = process.argv;
     process.argv = [
       'node',
       'dist'];
+    // eslint-disable-next-line global-require
     delete require.cache[require.resolve('commander')];
+    // eslint-disable-next-line global-require
     delete require.cache[require.resolve('../src/command')];
+    // eslint-disable-next-line global-require
     command = require('../src/command').default;
-    
 
-    if(fs.existsSync(testedPath)) {
+
+    if (fs.existsSync(testedPath)) {
       fs.unlink(testedPath);
     }
-    if(fs.existsSync(testDirectory)) {
+    if (fs.existsSync(testDirectory)) {
       fs.rmdir(testDirectory);
     }
-
   });
 
   afterEach(() => {
     process.argv = processArgv;
 
-    if(fs.existsSync(testedPath)) {
+    if (fs.existsSync(testedPath)) {
       fs.unlink(testedPath);
     }
-    if(fs.existsSync(testDirectory)) {
+    if (fs.existsSync(testDirectory)) {
       fs.rmdir(testDirectory);
     }
-
   });
-  
+
   it('Should create new file when there\'s file ', () => {
     process.argv = process.argv.concat([
       '-a',
       '0x91c94bee75786fbbfdcfefba1102b68f48a002f4',
       '-s',
-      testDirectory
+      testDirectory,
     ]);
 
     // test when file is not exists
@@ -223,5 +230,5 @@ describe('Test lastBlockNumberFilePath', () => {
     command(watchPath, lastBlockNumber);
     expect(fs.existsSync(testedPath)).to.be.equal(true);
   });
-})
+});
 

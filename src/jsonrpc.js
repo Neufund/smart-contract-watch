@@ -7,7 +7,7 @@ import { isInArray, isQueriedTransaction } from './utils';
 import { isAddress, validateBlockNumber } from './web3/utils';
 import initCustomRPCs from './web3/customRpc';
 
-const rpcErrorCatch = (e) => {
+export const rpcErrorCatch = (e) => {
   if (e.message.indexOf('Invalid JSON RPC response:') !== -1) {
     logError(e, `Network error occur, retry after ${waitingNumberInMilliseconds / 1000} seconds,
     from block number`, false);

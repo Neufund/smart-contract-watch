@@ -1,7 +1,7 @@
-import program from 'commander';
 import fs from 'fs';
 import path from 'path';
 import YAML from 'yamljs';
+import program from 'commander';
 import { defaultBlockNumber } from './config';
 import { isAddress, validateBlockNumber } from './web3/utils';
 import { isPathExist } from './utils';
