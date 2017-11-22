@@ -17,6 +17,6 @@ describe('getEnv', () => {
   });
 
   it('should rase Error', () => {
-    expect(() => getEnv('NOT_EXISTING_KEY')).to.throw('Enviroment variable is not eixsts');
+    expect(() => getEnv('NOT_EXISTING_KEY')).to.throw('Environment variable is not exists');
   });
 });

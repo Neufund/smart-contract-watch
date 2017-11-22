@@ -192,7 +192,7 @@ export default class JsonRpc {
     while ((this.toBlock && this.toBlock >= this.currentBlock) || (this.toBlock == null)) {
       try {
         if (this.currentBlock > lastBlockNumber) {
-          logger.info('Waiting 10 seconds until the incoming blocks');
+          logger.debug('Waiting 10 seconds until the incoming blocks');
           await bluebird.delay(waitingNumberInMilliseconds);
           lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
         } else {
