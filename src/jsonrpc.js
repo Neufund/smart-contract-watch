@@ -1,6 +1,6 @@
 import fs from 'fs';
 import bluebird from 'bluebird';
-import { defaultBlockNumber, defaultFromBlockNumber, waitingNumberInMilliseconds } from './config';
+import { defaultBlockNumber, defaultFromBlockNumber, waitingTimeInMilliseconds } from './config';
 import web3 from './web3/web3Provider';
 import logger, { logError } from './logger';
 import { isInArray, isQueriedTransaction } from './utils';
@@ -9,7 +9,7 @@ import initCustomRPCs from './web3/customRpc';
 
 export const rpcErrorCatch = (e) => {
   if (e.message.indexOf('Invalid JSON RPC response:') !== -1) {
-    logError(e, `Network error occur, retry after ${waitingNumberInMilliseconds / 1000} seconds,
+    logError(e, `Network error occur, retry after ${waitingTimeInMilliseconds / 1000} seconds,
     from block number`, false);
   } else { throw new Error(e.message); }
 };
@@ -192,8 +192,8 @@ export default class JsonRpc {
     while ((this.toBlock && this.toBlock >= this.currentBlock) || (this.toBlock == null)) {
       try {
         if (this.currentBlock > lastBlockNumber) {
-          logger.debug('Waiting 10 seconds until the incoming blocks');
-          await bluebird.delay(waitingNumberInMilliseconds);
+          logger.debug(`Waiting ${waitingTimeInMilliseconds / 1000} seconds until the incoming blocks`);
+          await bluebird.delay(waitingTimeInMilliseconds);
           lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
         } else {
           const block = await bluebird.promisify(this.web3Instance.getBlock)(
@@ -215,7 +215,7 @@ export default class JsonRpc {
         }
       } catch (e) {
         rpcErrorCatch(e);
-        await bluebird.delay(waitingNumberInMilliseconds);
+        await bluebird.delay(waitingTimeInMilliseconds);
       } // end catch
     } // end loop
   }

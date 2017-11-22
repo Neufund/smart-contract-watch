@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const getEnv = (variableName) => {
-  if (typeof process.env[variableName] === 'undefined') { throw new Error('Environment variable is not exists'); }
+  if (typeof process.env[variableName] === 'undefined') { throw new Error('Environment variable does not exist'); }
   return process.env[variableName];
 };
 
@@ -20,4 +20,4 @@ export const networksById = {
   42: 'kovan',
 };
 
-export const waitingNumberInMilliseconds = 10000;
+export const waitingTimeInMilliseconds = 10000;
