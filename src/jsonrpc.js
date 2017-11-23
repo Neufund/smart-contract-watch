@@ -1,11 +1,18 @@
 import fs from 'fs';
 import bluebird from 'bluebird';
-import { defaultBlockNumber, defaultFromBlockNumber } from './config';
+import { defaultBlockNumber, defaultFromBlockNumber, waitingTimeInMilliseconds } from './config';
 import web3 from './web3/web3Provider';
 import logger, { logError } from './logger';
 import { isInArray, isQueriedTransaction } from './utils';
 import { isAddress, validateBlockNumber } from './web3/utils';
 import initCustomRPCs from './web3/customRpc';
+
+export const rpcErrorCatch = (e) => {
+  if (e.message.indexOf('Invalid JSON RPC response:') !== -1) {
+    logError(e, `Network error occur, retry after ${waitingTimeInMilliseconds / 1000} seconds,
+    from block number`, false);
+  } else { throw new Error(e.message); }
+};
 
 export default class JsonRpc {
   /**
@@ -32,7 +39,7 @@ export default class JsonRpc {
   }
   /**
    * This will return the final data structure
-   * for the transaction resopnse
+   * for the transaction response
    * @param string tx
    * @param Object receipt
    * @param Array logs
@@ -47,7 +54,7 @@ export default class JsonRpc {
 
   /**
    * This will return the final data structure
-   * for the transaction resopnse
+   * for the transaction response
    * @param string tx
    * @param Object receipt
    * @param Array logs
@@ -84,19 +91,23 @@ export default class JsonRpc {
    * @param string txn
    */
   async scanTransaction(txn) {
-    const txnReceipts = await bluebird.promisify(this.web3Instance.getTransactionReceipt)(txn.hash);
-    const logs = txnReceipts.logs ? txnReceipts.logs.filter(log => isInArray(this.addresses,
-      log.address)) : [];
+    try {
+      const txnReceipts =
+      await bluebird.promisify(this.web3Instance.getTransactionReceipt)(txn.hash);
+      const logs = txnReceipts.logs ? txnReceipts.logs.filter(log => isInArray(this.addresses,
+        log.address)) : [];
 
-    if (txn.from && isInArray(this.addresses, txn.from.toLowerCase())) {
-      throw new Error('Address you entered is not a smart contract');
+      if (txn.from && isInArray(this.addresses, txn.from.toLowerCase())) {
+        throw new Error('Address you entered is not a smart contract');
+      }
+
+      // If the smart contract received transaction or there's logs execute the callback function
+      if (isQueriedTransaction({ txn, txnReceipts, logs, addresses: this.addresses })) {
+        return JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
+      }
+    } catch (e) {
+      rpcErrorCatch(e);
     }
-
-    // If the smart contract recieved transaction or there's logs execute the callback function
-    if (isQueriedTransaction({ txn, txnReceipts, logs, addresses: this.addresses })) {
-      return JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
-    }
-
     return null;
   }
 
@@ -108,26 +119,27 @@ export default class JsonRpc {
    */
   async scanSlowMode(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
-      const transactionsPromises = [];
+      const transactionsResult = [];
       for (let i = 0; i < block.transactions.length; i += 1) {
         const txn = block.transactions[i];
-        transactionsPromises.push(this.scanTransaction(txn));
-      }
-
-      const transactionsResult = [];
-      for (let i = 0; i < transactionsPromises.length; i += 1) {
         try {
-          const singleTransactionResult = await transactionsPromises[i];
+          const singleTransactionResult = await this.scanTransaction(txn);
           if (singleTransactionResult) { transactionsResult.push(singleTransactionResult); }
-        } catch (error) {
-          logError(error, "Couldn't handle the transaction because the RPC node is down",
-            false);
+        } catch (e) {
+          rpcErrorCatch(e);
         }
       }
+      logger.debug(`Number of transactions are ${transactionsResult.length}`);
 
       if (this.callback) {
-        transactionsResult.forEach((txn) => {
-          this.callback(txn);
+        transactionsResult.forEach(async (txn) => {
+          if (txn) {
+            try {
+              await this.callback(txn);
+            } catch (e) {
+              rpcErrorCatch(e);
+            }
+          }
         });
       }
     }
@@ -155,8 +167,8 @@ export default class JsonRpc {
    * @param {*} block 
    */
   async scanFastMode(block) {
-    const arrayOflogs = await this.getLogsFromOneBlock();
-    const logs = arrayOflogs.reduce((a, b) => [...a, ...b], []);
+    const logsAsArray = await this.getLogsFromOneBlock();
+    const logs = logsAsArray.reduce((a, b) => [...a, ...b], []);
     const blockTransactionsWithLogsList =
     this.getBlockAndTransactionLogsFormat(block, logs);
 
@@ -180,8 +192,8 @@ export default class JsonRpc {
     while ((this.toBlock && this.toBlock >= this.currentBlock) || (this.toBlock == null)) {
       try {
         if (this.currentBlock > lastBlockNumber) {
-          logger.info('Waiting 10 seconds until the incoming blocks');
-          await bluebird.delay(10000);
+          logger.debug(`Waiting ${waitingTimeInMilliseconds / 1000} seconds until the incoming blocks`);
+          await bluebird.delay(waitingTimeInMilliseconds);
           lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
         } else {
           const block = await bluebird.promisify(this.web3Instance.getBlock)(
@@ -202,14 +214,8 @@ export default class JsonRpc {
           }
         }
       } catch (e) {
-        if (e.message === 'Invalid JSON RPC response: ""') {
-          logError(e, `Network error ocurar,
-           retry after 2 seconds, from block number \
-          ${this.currentBlock}`, false);
-          await bluebird.delay(2000);
-        } else {
-          throw new Error(e.message);
-        } // end if
+        rpcErrorCatch(e);
+        await bluebird.delay(waitingTimeInMilliseconds);
       } // end catch
     } // end loop
   }
