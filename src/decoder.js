@@ -70,10 +70,7 @@ export default class Decoder {
         params: decoded.map((param, index) => {
           let parsedParam = param;
           if (abiItem.inputs[index].type.indexOf('uint') !== -1) {
-            parsedParam = Array.isArray(param) ?
-              param.map(singleNumber =>
-                web3Utils.toBigNumber(singleNumber).toString()) :
-              web3Utils.toBigNumber(param).toString();
+            parsedParam = Decoder.parseParams(param);
           }
           return {
             name: abiItem.inputs[index].name,
@@ -85,7 +82,12 @@ export default class Decoder {
     }
     return null;
   }
-
+  static parseParams(param) {
+    return Array.isArray(param) ?
+      param.map(singleNumber =>
+        web3Utils.toBigNumber(singleNumber).toString()) :
+      web3Utils.toBigNumber(param).toString();
+  }
   /**
    * Decode transaction input data
    *
@@ -94,6 +96,7 @@ export default class Decoder {
    */
   decodeMethod(inputData) {
     const errorObject = { name: 'UNDECODED', params: [{ name: 'rawData', value: inputData, type: 'data' }] };
+    if (typeof inputData !== 'string') throw new Error(`Expected sting got ${typeof inputData}`);
     if (inputData === '0x') return '';
 
     const methodID = inputData.slice(2, 10);
@@ -107,10 +110,7 @@ export default class Decoder {
         params: decoded.map((param, index) => {
           let parsedParam = param;
           if (abiItem.inputs[index].type.indexOf('uint') !== -1) {
-            parsedParam = Array.isArray(param) ?
-              param.map(singleNumber =>
-                web3Utils.toBigNumber(singleNumber).toString()) :
-              web3Utils.toBigNumber(param).toString();
+            parsedParam = Decoder.parseParams(param);
           }
           return {
             name: abiItem.inputs[index].name,
