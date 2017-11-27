@@ -1,7 +1,6 @@
 import SolidityCoder from 'web3/lib/solidity/coder';
 import sha3 from 'web3/lib/utils/sha3';
 import web3Utils from 'web3/lib/utils/utils';
-import ABICoder from 'web3-eth-abi/src/index';
 
 /**
  * This is based on Consynses ABI-decoder
@@ -65,13 +64,10 @@ export default class Decoder {
     if (abiItem) {
       const params = abiItem.inputs.map(item => item.type);
       const constructorData = Decoder.extractConstructorFromBytecode(contractCreationBytecode);
-      const decoded = ABICoder.decodeParameters(params, constructorData);
-      const result = Object.keys(decoded).map(key => decoded[key]);
-      result.pop();
-
+      const decoded = SolidityCoder.decodeParams(params, constructorData);
       return {
         name: abiItem.type,
-        params: result.map((param, index) => {
+        params: decoded.map((param, index) => {
           let parsedParam = param;
           if (abiItem.inputs[index].type.indexOf('uint') !== -1) {
             parsedParam = Array.isArray(param) ?
