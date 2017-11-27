@@ -1,4 +1,5 @@
 import SolidityCoder from 'web3/lib/solidity/coder';
+import ABICoder from 'web3-eth-abi/src/index';
 import web3 from './web3/web3Provider';
 
 /**
@@ -62,13 +63,20 @@ export default class Decoder {
     const abiItem = this.methodIDs.constructor;
     if (abiItem) {
       const params = abiItem.inputs.map(item => item.type);
-      const decoded = SolidityCoder.decodeParams(params, contractCreationCode.slice(10));
+      const decoded = ABICoder.decodeParameters(params, contractCreationCode);
+      const result = Object.keys(decoded).map(key => decoded[key]);
+      result.pop();
+
       return {
         name: abiItem.type,
-        params: decoded.map((param, index) => {
+        params: result.map((param, index) => {
           let parsedParam = param;
           if (abiItem.inputs[index].type.indexOf('uint') !== -1) {
-            parsedParam = web3.toBigNumber(param).toString();
+            parsedParam = Array.isArray(param) ?
+              param.map(singleNumber =>
+                web3.toBigNumber(singleNumber).toString()) :
+              web3.toBigNumber(param).toString();
+            // parsedParam = web3.toBigNumber(param).toString();
           }
           return {
             name: abiItem.inputs[index].name,
@@ -94,13 +102,18 @@ export default class Decoder {
     const abiItem = this.methodIDs[methodID];
     if (abiItem) {
       const params = abiItem.inputs.map(item => item.type);
+
       const decoded = SolidityCoder.decodeParams(params, inputData.slice(10));
       return {
         name: abiItem.name,
         params: decoded.map((param, index) => {
           let parsedParam = param;
           if (abiItem.inputs[index].type.indexOf('uint') !== -1) {
-            parsedParam = web3.toBigNumber(param).toString();
+            parsedParam = Array.isArray(param) ?
+              param.map(singleNumber =>
+                web3.toBigNumber(singleNumber).toString()) :
+              web3.toBigNumber(param).toString();
+          //  parsedParam = web3.toBigNumber(param).toString();
           }
           return {
             name: abiItem.inputs[index].name,
