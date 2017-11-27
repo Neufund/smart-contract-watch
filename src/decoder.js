@@ -1,6 +1,7 @@
 import SolidityCoder from 'web3/lib/solidity/coder';
+import sha3 from 'web3/lib/utils/sha3';
+import web3Utils from 'web3/lib/utils/utils';
 import ABICoder from 'web3-eth-abi/src/index';
-import web3 from './web3/web3Provider';
 
 /**
  * This is based on Consynses ABI-decoder
@@ -21,13 +22,13 @@ export default class Decoder {
           this.methodIDs.constructor = abi;
           return this.methodIDs.constructor;
         } else if (abi.name) {
-          const signature = web3.sha3(`${abi.name}(${abi.inputs.map(input => input.type).join(',')})`);
+          const signature = sha3(`${abi.name}(${abi.inputs.map(input => input.type).join(',')})`);
           if (abi.type === 'event') {
-            this.methodIDs[signature.slice(2)] = abi;
-            return this.methodIDs[signature.slice(2)];
+            this.methodIDs[signature] = abi;
+            return this.methodIDs[signature];
           }
-          this.methodIDs[signature.slice(2, 10)] = abi;
-          return this.methodIDs[signature.slice(2, 10)];
+          this.methodIDs[signature.slice(0, 8)] = abi;
+          return this.methodIDs[signature.slice(0, 8)];
         }
         return null;
       });
@@ -58,12 +59,13 @@ export default class Decoder {
    * @param Object contract creation code
    * @return {}
    */
-  decodeConstructor(contractCreationCode) {
+  decodeConstructor(contractCreationBytecode) {
     if (this.methodIDs.constructor.type !== 'constructor') throw new Error(`Expected constructor got${this.methodIDs.constructor.type}`);
     const abiItem = this.methodIDs.constructor;
     if (abiItem) {
       const params = abiItem.inputs.map(item => item.type);
-      const decoded = ABICoder.decodeParameters(params, contractCreationCode);
+      const constructorData = Decoder.extractConstructorFromBytecode(contractCreationBytecode);
+      const decoded = ABICoder.decodeParameters(params, constructorData);
       const result = Object.keys(decoded).map(key => decoded[key]);
       result.pop();
 
@@ -74,9 +76,8 @@ export default class Decoder {
           if (abiItem.inputs[index].type.indexOf('uint') !== -1) {
             parsedParam = Array.isArray(param) ?
               param.map(singleNumber =>
-                web3.toBigNumber(singleNumber).toString()) :
-              web3.toBigNumber(param).toString();
-            // parsedParam = web3.toBigNumber(param).toString();
+                web3Utils.toBigNumber(singleNumber).toString()) :
+              web3Utils.toBigNumber(param).toString();
           }
           return {
             name: abiItem.inputs[index].name,
@@ -98,6 +99,7 @@ export default class Decoder {
   decodeMethod(inputData) {
     const errorObject = { name: 'UNDECODED', params: [{ name: 'rawData', value: inputData, type: 'data' }] };
     if (inputData === '0x') return '';
+
     const methodID = inputData.slice(2, 10);
     const abiItem = this.methodIDs[methodID];
     if (abiItem) {
@@ -111,9 +113,8 @@ export default class Decoder {
           if (abiItem.inputs[index].type.indexOf('uint') !== -1) {
             parsedParam = Array.isArray(param) ?
               param.map(singleNumber =>
-                web3.toBigNumber(singleNumber).toString()) :
-              web3.toBigNumber(param).toString();
-          //  parsedParam = web3.toBigNumber(param).toString();
+                web3Utils.toBigNumber(singleNumber).toString()) :
+              web3Utils.toBigNumber(param).toString();
           }
           return {
             name: abiItem.inputs[index].name,
@@ -168,10 +169,10 @@ export default class Decoder {
           }
 
           if (param.type === 'address') {
-            decodedParam.value = Decoder.padZeros(web3.toBigNumber(decodedParam.value)
+            decodedParam.value = Decoder.padZeros(web3Utils.toBigNumber(decodedParam.value)
               .toString(16));
           } else if (param.type === 'uint256' || param.type === 'uint8' || param.type === 'int') {
-            decodedParam.value = web3.toBigNumber(decodedParam.value).toString(10);
+            decodedParam.value = web3Utils.toBigNumber(decodedParam.value).toString(10);
           }
 
           decodedParameters.push(decodedParam);
@@ -188,6 +189,22 @@ export default class Decoder {
       return errorObject;
     });
     return decodedLogs;
+  }
+  /**
+  * Extracts constructor data from smart contract creation bytecode
+  * Uses bytecode end data signature to generate offset and slice
+  * @param {string}
+  * @return {string}
+  */
+  static extractConstructorFromBytecode(contractCreationBytecode) {
+    // http://solidity.readthedocs.io/en/develop/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode
+    const endOfBytCodeSig = 'a165627a7a72305820';
+    const bzzrtOffset = 82;
+    const endofByteCode = 4;
+    const offset = contractCreationBytecode.indexOf(endOfBytCodeSig);
+    if (contractCreationBytecode.slice(offset + bzzrtOffset,
+      offset + bzzrtOffset + 4) !== '0029') { throw new Error('Decoder cannot find Metadata swarm file in bytecode '); }
+    return contractCreationBytecode.slice(offset + bzzrtOffset + endofByteCode);
   }
 
   /**
