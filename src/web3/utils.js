@@ -1,20 +1,20 @@
 import bluebird from 'bluebird';
-import web3Instance from './web3Provider';
+import { getWeb3 } from './web3Provider';
 import { defaultBlockNumber } from '../config';
 
 /**
  * Check is address correct
  * @param address
  */
-export const isAddress = address => web3Instance.isAddress(address);
+export const isAddress = address => getWeb3().isAddress(address);
 
 /**
  * Return the eth network id for the current web3Instance
  * @returns integer
  */
-const getEtherNetworkId = () => web3Instance.version.network;
+const getEtherNetworkId = () => getWeb3().version.network;
 
-export const getLastBlock = () => bluebird.promisify(web3Instance.eth.getBlockNumber)();
+export const getLastBlock = () => bluebird.promisify(getWeb3().eth.getBlockNumber)();
 
 /**
  * Check if block number is correct by passing the last block number

@@ -1,10 +1,16 @@
-import { expect } from 'chai';
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import JsonRpc, { rpcErrorCatch } from '../src/jsonrpc';
 import logger from '../src/logger';
 import blockTemplate from './mockedData/block';
 import transactionReceiptTemplate from './mockedData/transactionReceipt';
-import web3 from '../src/web3/web3Provider';
+import * as web3Provider from '../src/web3/web3Provider';
+import * as web3Utils from '../src/web3/utils';
+
+chai.use(chaiAsPromised);
+chai.should();
+const expect = chai.expect;
 
 logger.transports.console.level = 'error';
 
@@ -24,6 +30,20 @@ const getTransactionEmpty = (transaction, callback) => {
 const getBlockNumber = (callback) => {
   if (callback) { callback(null, Number.MAX_SAFE_INTEGER); }
 };
+
+const mockWeb3 = {
+  eth : {
+    getBlock: (blockNumber, transactions, callback) => {
+      if (callback) { callback(null, blockTemplate); }
+    },
+    getTransactionReceipt: (blockNumber, transactions, callback) => {
+      if (callback) { callback(null, {}); }
+    },
+    getBlockNumber: (callback) => {
+      if (callback) { callback(null, Number.MAX_SAFE_INTEGER); }
+    }
+  }
+}
 
 let callbackExecutedCounter = 0;
 const tranactionHandler = () => {
@@ -50,24 +70,29 @@ describe('JsonRpc', () => {
       getTransactionReceiptFunction = getTransactionEmpty;
     }
 
-    sinon.stub(web3.eth, 'getBlock').withArgs().callsFake(getBlockFunction);
-    sinon.stub(web3.eth, 'getTransactionReceipt').withArgs()
-      .callsFake(getTransactionReceiptFunction);
-    sinon.stub(web3.eth, 'getBlockNumber').withArgs().callsFake(getBlockNumber);
+    sinon.stub(web3Provider, 'getWeb3').withArgs().returns(mockWeb3);
+    sinon.stub(web3Utils, 'isAddress').withArgs().returns(true);
+    // sinon.stub(web3.eth, 'getBlock').withArgs().callsFake(getBlockFunction);
+    // sinon.stub(web3.eth, 'getTransactionReceipt').withArgs()
+    //   .callsFake(getTransactionReceiptFunction);
+    // sinon.stub(web3.eth, 'getBlockNumber').withArgs().callsFake(getBlockNumber);
   });
 
   afterEach(() => {
-    web3.eth.getBlock.restore();
-    web3.eth.getTransactionReceipt.restore();
-    web3.eth.getBlockNumber.restore();
+    // const web3 = getWeb3();
+    web3Provider.getWeb3.restore();
+    web3Utils.isAddress.restore()
+    // web3.eth.getBlock.restore();
+    // web3.eth.getTransactionReceipt.restore();
+    // web3.eth.getBlockNumber.restore();
   });
 
-  it('should equal 0 no address given to check', async () => {
+  it('should equal 0 no address given to check', () => {
     addresses = [];
     jsonRpc = new JsonRpc(addresses, blockFrom, blockTo,
       lastBlockNumberFilePath, tranactionHandler);
-    await jsonRpc.scanBlocks();
-    expect(callbackExecutedCounter).to.equal(0);
+    jsonRpc.scanBlocks();
+    callbackExecutedCounter.should.to.eventually.equal(0);
   });
 
   it(`should return expected result when multiple addresses are

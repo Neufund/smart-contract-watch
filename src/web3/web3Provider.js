@@ -2,7 +2,7 @@ import Web3 from 'web3';
 import { getCommandVars } from '../command';
 
 let web3;
-const getWeb3 = () => {
+export const getWeb3 = () => {
   if (typeof web3 !== 'undefined') {
     web3 = new Web3(web3.currentProvider);
   } else {
@@ -11,5 +11,3 @@ const getWeb3 = () => {
   }
   return web3;
 };
-
-export default getWeb3();
