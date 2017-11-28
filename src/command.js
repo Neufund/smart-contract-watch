@@ -1,4 +1,4 @@
-
+import fs from 'fs';
 import program from 'commander';
 import path from 'path';
 import YAML from 'yamljs';
@@ -127,3 +127,5 @@ export default (watchPath) => {
     accessToken: program.accessToken,
   };
 };
+
+export const getCommandVars = name => program[name] || '';

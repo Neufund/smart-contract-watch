@@ -1,9 +1,9 @@
 import winston from 'winston';
-import command from './command';
+import { getCommandVars } from './command';
 
 const loggerConsoleOptions = {
   timestamp: false,
-  level: command().logLevel,
+  level: getCommandVars('logLevel'),
   colorize: false,
   formatter: options => `${options.message}`,
 };
@@ -19,7 +19,7 @@ const logger = new (winston.Logger)({
  * @param {*} customMessage
  */
 export const logError = (error, customMessage = null, isStack = true) => {
-  switch (command().outputType) {
+  switch (getCommandVars('outputType')) {
     case 'terminal':
       logger.error(error.message);
       logger.error(error.stack);

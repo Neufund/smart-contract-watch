@@ -70,12 +70,12 @@ describe('JsonRpc', () => {
     expect(callbackExecutedCounter).to.equal(0);
   });
 
-  it(`should return expected result when multiple addresses are 
+  it(`should return expected result when multiple addresses are
   given to check`, async () => {
       addresses = ['0xa74476443119A942dE498590Fe1f2454d7D4aC0d',
         '0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c'];
       // 3 is the number of the times that this address has been shown in each block
-      // +1 because the loop is checking the last block as well 
+      // +1 because the loop is checking the last block as well
       const expectedIterations = 3 * ((blockTo - blockFrom) + 1);
       jsonRpc = new JsonRpc(addresses, blockFrom, blockTo,
         lastBlockNumberFilePath, tranactionHandler);
@@ -87,7 +87,7 @@ describe('JsonRpc', () => {
     async () => {
       addresses = ['0xa74476443119A942dE498590Fe1f2454d7D4aC0d'];
       // 3 is the number of the times that this address has been shown in each block
-      // +1 because the loop is checking the last block as well 
+      // +1 because the loop is checking the last block as well
       const expectedIterations = 3 * ((blockTo - blockFrom) + 1);
       jsonRpc = new JsonRpc(addresses, blockFrom, blockTo,
         lastBlockNumberFilePath, tranactionHandler);

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { networksById } from './config';
 import web3Utils from './web3/utils';
-import command from './command';
+import { getCommandVars } from './command';
 
 
 const expectedResponse = {
@@ -46,7 +46,7 @@ const scrapeABI = async (address) => {
     qs: {
       action: 'getabi',
       address,
-      access_token: command().accessToken,
+      access_token: getCommandVars('accessToken'),
     },
     headers: {
       'User-Agent': 'Request-Promise',
