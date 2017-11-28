@@ -22,7 +22,7 @@ export const getLastBlock = () => bluebird.promisify(getWeb3().eth.getBlockNumbe
  * @param lastBlockNumber
  * @param blockNumber
  */
-export const validateBlockNumber = async (blockNumber) => {
+export const validateBlock = async (blockNumber) => {
   if (blockNumber === defaultBlockNumber) return defaultBlockNumber;
   const lastBlockNumber = await getLastBlock();
   if (isNaN(blockNumber) || await lastBlockNumber < blockNumber) {
@@ -34,7 +34,7 @@ export const validateBlockNumber = async (blockNumber) => {
 const web3Utils =
 {
   isAddress,
-  validateBlockNumber,
+  validateBlock,
   getEtherNetworkId,
 };
 

@@ -3,20 +3,22 @@ import program from 'commander';
 import path from 'path';
 import YAML from 'yamljs';
 import { defaultBlockNumber, watchingConfigPath, getEnv, saveStateFileName } from './config';
-import { isPathExist } from './utils';
+import { isPathExist, validateBlockByNumber } from './utils';
 
 const rpcErrorMsg = '-n or --nodeAddress is required';
 const addressErrorMsg = '-a or --address is required';
-const quickModeErrorMsg = '-q or --quick-mode should only be a bool value';
+const quickModeErrorMsg = '-q or --quick-mode shouldn\'t have any value';
 const loggerErrorMsg = 'Logger is not correct type';
-const noArgsErrorMsg = 'No args are specifed in the command or in the .watch.yml file';
+const noArgsErrorMsg = 'No args are specified in the command or in the .watch.yml file';
 
 const defaultLogLevel = 'info';
 const defaultStartBlock = 0;
-const defaultQuickMode = true;
+const defaultQuickMode = false;
 const defaultSaveState = null;
 const defaultOutputType = 'terminal';
 const defaultAccessToken = '';
+
+const validLoggerValues = ['info', 'error', 'debug'];
 
 /**
  * convert string to array
@@ -41,29 +43,12 @@ const handelInputValues = (envName, fileInst, defaultValue) =>
  * @return addresses
  */
 const validateParamter = (parameter, errMsg) => {
-  if (!parameter || !parameter.length > 0) {
+  if (!parameter || parameter.length === 0) {
     throw new Error(errMsg);
   }
   return parameter;
 };
-// const validateAddresses = (addresses) => {
-//   if (!addresses) throw new Error('-a or --address is required');
-//   addresses.forEach((address) => {
-//     if (!isAddress(address)) { throw new Error(`${address} is not valid address`); }
-//   });
-//   return addresses;
-// };
 
-/**
- * Should throw if starting block is bigger than endblock while end block is not default
- * @param {integer} fromBlock
- * @param {integer} toBlock
- *
- */
-const validateBlockbySize = (fromBlock, toBlock) => {
-  if (toBlock !== defaultBlockNumber && fromBlock > toBlock) { throw new Error(`From "${fromBlock}" shouldn't be larger than "${toBlock}"`); }
-  return fromBlock;
-};
 
 /**
  * Create saveState file if it doesn't exist, read last Blockwritten in file if it exists
@@ -80,21 +65,29 @@ const handleSaveSate = (saveStatePath, from) => {
       fs.writeFileSync(lastBlockNumberFilePath, JSON.stringify({ blockNumber: from }));
       return from;
     }
-    return (JSON.parse(fs.readFileSync(lastBlockNumberFilePath, { encoding: 'utf8' }))).blockNumber;
+    return JSON.parse(fs.readFileSync(lastBlockNumberFilePath, { encoding: 'utf8' })).blockNumber;
   }
   return null;
 };
 
+/**
+ * Checks if variable is a boolean value and returns values if true
+ * @param {boolean} parameter
+ * @param {string} ErrorMsg
+ * @returns value
+ *
+ */
 const validateBool = (parameter, ErrorMsg) => {
-  if (typeof (parameter) !== 'boolean') throw new Error(ErrorMsg);
+  if (typeof (parameter) !== 'boolean'
+    && parameter !== ('true' || 'false')) { throw new Error(ErrorMsg); }
   return parameter;
 };
-const validLoggerValues = ['info', 'error', 'debug'];
 
 const validateParamBasedOnValue = (parameter, validValues, errMsg) => {
   if (!validValues.some(value => value === parameter)) throw new Error(errMsg);
   return parameter;
 };
+
 export default (watchPath) => {
   // Used during testing
   const watchConfig = watchPath ? YAML.load(watchPath) : YAML.load(watchingConfigPath);
@@ -114,9 +107,10 @@ export default (watchPath) => {
   }
   if (typeof program === 'undefined') { throw new Error(noArgsErrorMsg); }
   const from = program.saveState ? handleSaveSate(program.saveState, program.from) : program.from;
-  const saveState = program.saveState ? path.join(program.saveState, saveStateFileName) : null;
+  const saveState = program.saveState ?
+    path.join(path.resolve(program.saveState), saveStateFileName) : null;
   return {
-    from: validateBlockbySize(from, program.to),
+    from: validateBlockByNumber(from, program.to),
     to: program.to,
     addresses: validateParamter(program.addresses, addressErrorMsg),
     quickMode: validateBool(program.quick, quickModeErrorMsg),

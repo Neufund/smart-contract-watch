@@ -3,7 +3,6 @@ import { getCommandVars } from './command';
 
 const loggerConsoleOptions = {
   timestamp: false,
-  level: getCommandVars('logLevel'),
   colorize: false,
   formatter: options => `${options.message}`,
 };
@@ -13,6 +12,14 @@ const logger = new (winston.Logger)({
     new (winston.transports.Console)(loggerConsoleOptions),
   ] });
 
+
+/**
+* sets logger level
+* @param {string}
+*/
+export const setLoggerLevel = (logLevel) => {
+  logger.transports.console.level = logLevel;
+};
 /**
  * This will print out the error as json formatted
  * @param {*} error

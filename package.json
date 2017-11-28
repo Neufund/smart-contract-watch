@@ -11,7 +11,7 @@
     "start": "(./copyfiles.sh || true) && ./node_modules/.bin/babel  ./src --experimental --source-maps-inline -d ./dist && node ./dist ",
     "lint": "eslint src",
     "fix": "eslint src --fix",
-    "test": "(./copyfiles.sh || true) && nyc ./node_modules/mocha/bin/mocha --compilers js:babel-core/register 'test/**/*.spec.js?(x)'",
+    "test": "nyc ./node_modules/mocha/bin/mocha --compilers js:babel-core/register 'test/**/*.spec.js?(x)'",
     "coverage": "nyc report --reporter=text-lcov > coverage.lcov && ./node_modules/.bin/codecov"
   },
   "devDependencies": {

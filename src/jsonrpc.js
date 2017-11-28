@@ -3,8 +3,8 @@ import bluebird from 'bluebird';
 import { defaultBlockNumber, defaultFromBlockNumber, waitingTimeInMilliseconds } from './config';
 import { getWeb3 } from './web3/web3Provider';
 import logger, { logError } from './logger';
-import { isInArray, isQueriedTransaction } from './utils';
-import { isAddress, validateBlockNumber } from './web3/utils';
+import { isInArray, isQueriedTransaction, validateBlockByNumber } from './utils';
+import { isAddress, getLastBlock } from './web3/utils';
 import initCustomRPCs from './web3/customRpc';
 
 export const rpcErrorCatch = (e) => {
@@ -113,9 +113,9 @@ export default class JsonRpc {
 
   /**
    * This function handles the transactions that exist in one block
-   *  and puts them into an array of promises, then executes them and finally 
+   *  and puts them into an array of promises, then executes them and finally
    * send them to the output module;
-   * @param Object block 
+   * @param Object block
    */
   async scanSlowMode(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
@@ -163,8 +163,8 @@ export default class JsonRpc {
   }
 
   /**
-   * This function getting the logs out per block 
-   * @param {*} block 
+   * This function getting the logs out per block
+   * @param {*} block
    */
   async scanFastMode(block) {
     const logsAsArray = await this.getLogsFromOneBlock();
@@ -183,10 +183,10 @@ export default class JsonRpc {
    * The main function that run scan all the blocks.
    */
   async scanBlocks(isFastMode = false) {
-    let lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
-    validateBlockNumber(lastBlockNumber, this.currentBlock);
+    let lastBlockNumber = await getLastBlock();
+    validateBlockByNumber(this.currentBlock, lastBlockNumber);
     if (this.toBlock) {
-      validateBlockNumber(lastBlockNumber, this.toBlock);
+      validateBlockByNumber(this.toBlock, lastBlockNumber);
     }
 
     while ((this.toBlock && this.toBlock >= this.currentBlock) || (this.toBlock == null)) {
@@ -194,7 +194,7 @@ export default class JsonRpc {
         if (this.currentBlock > lastBlockNumber) {
           logger.debug(`Waiting ${waitingTimeInMilliseconds / 1000} seconds until the incoming blocks`);
           await bluebird.delay(waitingTimeInMilliseconds);
-          lastBlockNumber = await bluebird.promisify(this.web3Instance.getBlockNumber)();
+          lastBlockNumber = await getLastBlock();
         } else {
           const block = await bluebird.promisify(this.web3Instance.getBlock)(
             this.currentBlock, true);

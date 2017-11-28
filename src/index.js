@@ -1,5 +1,5 @@
-import logger, { logError } from './logger';
-import command from './command';
+import logger, { logError, setLoggerLevel } from './logger';
+import command, { getCommandVars } from './command';
 import Decoder from './decoder';
 import JsonRpc from './jsonrpc';
 import { getABI } from './etherscan';
@@ -47,7 +47,7 @@ const transactionHandler = async (transaction) => {
       logger.error(`txHash: ${transaction.hash} ${error.message}`);
     }
   }
-  output({ transaction, decodedInputDataResult, decodedLogs }, command().outputType);
+  output({ transaction, decodedInputDataResult, decodedLogs }, getCommandVars('outputType'));
 };
 
 
@@ -57,8 +57,8 @@ const transactionHandler = async (transaction) => {
 const main = async () => {
   try {
     const { from, to, addresses, quickMode,
-      lastBlockNumberFilePath } = command();
-
+      lastBlockNumberFilePath, logLevel } = command();
+    setLoggerLevel(logLevel);
     logger.debug('Start process');
 
     const PromisifiedAbiObjects = addresses.map(async address => (
