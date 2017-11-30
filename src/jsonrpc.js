@@ -3,7 +3,7 @@ import bluebird from 'bluebird';
 import { defaultBlockNumber, defaultFromBlockNumber, waitingTimeInMilliseconds } from './config';
 import web3 from './web3/web3Provider';
 import logger, { logError } from './logger';
-import { isInArray, isQueriedTransaction } from './utils';
+import { isInArray, isQueriedTransaction, isContractCreationQueriedTransaction, isRegularQueriedTransaction } from './utils';
 import { isAddress, validateBlockNumber } from './web3/utils';
 import initCustomRPCs from './web3/customRpc';
 
@@ -69,15 +69,14 @@ export default class JsonRpc {
       transactionLogs[log.transactionHash].push(log);
     });
     const result = [];
-
     block.transactions.filter(transaction =>
-      isInArray(this.addresses, transaction.to)
+      isContractCreationQueriedTransaction({ txn: transaction, addresses: this.addresses }) ||
+      isRegularQueriedTransaction({ addresses: this.addresses, QueriedAddress: transaction.to })
     ).forEach((transaction) => {
       const transactionObject = transaction;
       if (typeof transactionLogs[transactionObject.hash] !== 'undefined') {
         transactionObject.logs = transactionLogs[transactionObject.hash];
       } else { transactionObject.logs = []; }
-
       result.push(transactionObject);
     });
 
@@ -113,9 +112,9 @@ export default class JsonRpc {
 
   /**
    * This function handles the transactions that exist in one block
-   *  and puts them into an array of promises, then executes them and finally 
+   *  and puts them into an array of promises, then executes them and finally
    * send them to the output module;
-   * @param Object block 
+   * @param Object block
    */
   async scanSlowMode(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
@@ -163,8 +162,8 @@ export default class JsonRpc {
   }
 
   /**
-   * This function getting the logs out per block 
-   * @param {*} block 
+   * This function getting the logs out per block
+   * @param {*} block
    */
   async scanFastMode(block) {
     const logsAsArray = await this.getLogsFromOneBlock();
