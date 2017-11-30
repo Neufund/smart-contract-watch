@@ -34,8 +34,9 @@ export const isLogsQueriedTransaction = logCount => logCount > 0;
  * @param {*} addresses
  * @return bool
  */
-export const isContractCreationQueriedTransaction = (txnReceipts, addresses) =>
-  txnReceipts.contractAddress && isInArray(addresses, txnReceipts.contractAddress.toLowerCase());
+export const isContractCreationQueriedTransaction = ({ txn, addresses }) =>
+  ((txn.contractAddress && isInArray(addresses, txn.contractAddress.toLowerCase()))
+  || (txn.creates && isInArray(addresses, txn.creates.toLowerCase())));
 
 /**
  * Check if address is not undefined and exists inside the array
@@ -44,7 +45,7 @@ export const isContractCreationQueriedTransaction = (txnReceipts, addresses) =>
  */
 export const isQueriedTransaction = ({ txn, txnReceipts, logs, addresses }) =>
   !!((isRegularQueriedTransaction({ QueriedAddress: txn.to, addresses })
-    || isContractCreationQueriedTransaction(txnReceipts, addresses))
+    || isContractCreationQueriedTransaction({ txn: txnReceipts, addresses }))
       || isLogsQueriedTransaction({ logCount: logs.length }));
 
 /**

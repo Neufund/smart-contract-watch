@@ -28,7 +28,7 @@ const transactionHandler = async (transaction) => {
   let decodedInputDataResult;
   if (isContractCreationTransaction(transaction.to)) {
     try {
-      decodedInputDataResult = addressAbiMap[transaction.contractAddress]
+      decodedInputDataResult = addressAbiMap[transaction.contractAddress || transaction.creates]
         .decodeConstructor(transaction.input);
       decodedLogs = null;
     } catch (error) {

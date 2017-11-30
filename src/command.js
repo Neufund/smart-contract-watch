@@ -100,7 +100,7 @@ export default (watchPath) => {
       .option('-q, --quick [n]', 'Quick Mode', handelInputValues('QUICK_MODE', watchConfig.quick, defaultQuickMode))
       .option('-s, --save-state [n]', 'Save state', handelInputValues('SAVE_STATE', watchConfig.saveState, defaultSaveState))
       .option('-n, --node-url [n]', 'Node address', handelInputValues('RPC_URL', watchConfig.nodeUrl))
-      .option('-l, --log-level [n]', 'Log level', handelInputValues('LOG_LEVEL', watchConfig.log_level, defaultLogLevel))
+      .option('-l, --log-level [n]', 'Log level', handelInputValues('LOG_LEVEL', watchConfig.logLevel, defaultLogLevel))
       .option('-o,--output-type [n]', 'Output type', handelInputValues('OUTPUT_TYPE', watchConfig.outputType, defaultOutputType))
       .option('-e,--access-token [n]', 'etherscan accssess token', handelInputValues('ACCESS_TOKEN', watchConfig.accessToken, defaultAccessToken))
       .parse(process.argv);
