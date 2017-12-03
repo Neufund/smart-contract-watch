@@ -90,7 +90,10 @@ const validateParamBasedOnValue = (parameter, validValues, errMsg) => {
 
 export default (watchPath) => {
   // Used during testing
-  const watchConfig = watchPath ? YAML.load(watchPath) : YAML.load(watchingConfigPath);
+  const watchConfigPath = watchPath || watchingConfigPath;
+  const watchConfig = fs.existsSync(watchConfigPath) ? YAML.load(watchConfigPath) : {};
+
+
   if (program.options.length === 0) {
     program
       .version('0.1.0')
