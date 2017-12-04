@@ -1,5 +1,6 @@
 import web3Utils from '../web3/utils';
 import { networksById } from '../config';
+import Decoder from '../decoder';
 
 const formatLogs = (logs) => {
   if (!logs) return [];
@@ -22,12 +23,13 @@ export default (transaction, decodedTransaction, decodedLogs) => ({
   fromAddress: transaction.from,
   toAddress: transaction.to,
   transactionHash: transaction.hash,
-  input: transaction.input,
+  input: transaction.creates ?
+    Decoder.extractConstructorFromBytecode(transaction.input) : transaction.input,
   gas: transaction.gas,
   gasPrice: transaction.gasPrice,
   status: transaction.status,
   value: transaction.value,
-  transactionType: transaction.contractAddress ? 'Contract Cration' : 'Transaction',
+  transactionType: transaction.contractAddress ? 'Contract Creation' : 'Transaction',
   contractAddress: transaction.contractAddress,
   methodName: decodedTransaction.name,
   methodParameters: decodedTransaction.params,
