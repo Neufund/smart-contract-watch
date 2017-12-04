@@ -1,11 +1,13 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
+import Web3 from 'web3';
 import JsonRpc, { rpcErrorCatch } from '../src/jsonrpc';
 import logger from '../src/logger';
 import blockTemplate from './mockedData/block';
 import transactionReceiptTemplate from './mockedData/transactionReceipt';
-import web3 from '../src/web3/web3Provider';
+import * as web3Provider from '../src/web3/web3Provider';
 
+let web3;
 logger.transports.console.level = 'error';
 
 const getBlock = (blockNumber, transactions, callback) => {
@@ -50,6 +52,8 @@ describe('JsonRpc', () => {
       getTransactionReceiptFunction = getTransactionEmpty;
     }
 
+    sinon.stub(web3Provider, 'getWeb3').withArgs().returns(new Web3());
+    web3 = web3Provider.getWeb3();
     sinon.stub(web3.eth, 'getBlock').withArgs().callsFake(getBlockFunction);
     sinon.stub(web3.eth, 'getTransactionReceipt').withArgs()
       .callsFake(getTransactionReceiptFunction);
@@ -57,6 +61,7 @@ describe('JsonRpc', () => {
   });
 
   afterEach(() => {
+    web3Provider.getWeb3.restore();
     web3.eth.getBlock.restore();
     web3.eth.getTransactionReceipt.restore();
     web3.eth.getBlockNumber.restore();
@@ -70,12 +75,12 @@ describe('JsonRpc', () => {
     expect(callbackExecutedCounter).to.equal(0);
   });
 
-  it(`should return expected result when multiple addresses are 
+  it(`should return expected result when multiple addresses are
   given to check`, async () => {
       addresses = ['0xa74476443119A942dE498590Fe1f2454d7D4aC0d',
         '0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c'];
       // 3 is the number of the times that this address has been shown in each block
-      // +1 because the loop is checking the last block as well 
+      // +1 because the loop is checking the last block as well
       const expectedIterations = 3 * ((blockTo - blockFrom) + 1);
       jsonRpc = new JsonRpc(addresses, blockFrom, blockTo,
         lastBlockNumberFilePath, tranactionHandler);
@@ -87,7 +92,7 @@ describe('JsonRpc', () => {
     async () => {
       addresses = ['0xa74476443119A942dE498590Fe1f2454d7D4aC0d'];
       // 3 is the number of the times that this address has been shown in each block
-      // +1 because the loop is checking the last block as well 
+      // +1 because the loop is checking the last block as well
       const expectedIterations = 3 * ((blockTo - blockFrom) + 1);
       jsonRpc = new JsonRpc(addresses, blockFrom, blockTo,
         lastBlockNumberFilePath, tranactionHandler);

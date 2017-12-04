@@ -1,5 +1,5 @@
 import fs from 'fs';
-
+import { defaultBlockNumber } from './config';
 /**
  * @param Array array
  * @param bool element
@@ -47,6 +47,17 @@ export const isQueriedTransaction = ({ txn, txnReceipts, logs, addresses }) =>
   !!((isRegularQueriedTransaction({ QueriedAddress: txn.to, addresses })
     || isContractCreationQueriedTransaction({ txn: txnReceipts, addresses }))
       || isLogsQueriedTransaction({ logCount: logs.length }));
+
+/**
+* Should throw if starting block is bigger than endblock while end block is not default
+* @param {integer} fromBlock
+* @param {integer} toBlock
+*
+*/
+export const validateBlockByNumber = (fromBlock, toBlock) => {
+  if (toBlock !== defaultBlockNumber && fromBlock > toBlock) { throw new Error(`From "${fromBlock}" shouldn't be larger than "${toBlock}"`); }
+  return fromBlock;
+};
 
 /**
  * check if path is exists or not

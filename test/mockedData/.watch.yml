@@ -2,3 +2,4 @@ from: 3917867
 to: 4240720
 addresses:
  - "0xda7c27c04f66842faf20644814b644e25e1766ea"
+nodeUrl: "http://localhost:8545"

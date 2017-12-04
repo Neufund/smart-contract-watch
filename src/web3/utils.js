@@ -1,9 +1,20 @@
-import web3Instance from './web3Provider';
+import bluebird from 'bluebird';
+import { getWeb3 } from './web3Provider';
+import { defaultBlockNumber } from '../config';
+
 /**
  * Check is address correct
  * @param address
  */
-export const isAddress = address => web3Instance.isAddress(address);
+export const isAddress = address => getWeb3().isAddress(address);
+
+/**
+ * Return the eth network id for the current web3Instance
+ * @returns integer
+ */
+const getEtherNetworkId = () => getWeb3().version.network;
+
+export const getLastBlock = () => bluebird.promisify(getWeb3().eth.getBlockNumber)();
 
 /**
  * Check if block number is correct by passing the last block number
@@ -11,22 +22,19 @@ export const isAddress = address => web3Instance.isAddress(address);
  * @param lastBlockNumber
  * @param blockNumber
  */
-export const validateBlockNumber = (lastBlockNumber, blockNumber) => {
-  if (isNaN(blockNumber) || lastBlockNumber < blockNumber) {
-    throw new Error(`${blockNumber} ${lastBlockNumber} is not valid block number`);
+export const validateBlock = async (blockNumber) => {
+  if (blockNumber === defaultBlockNumber) return defaultBlockNumber;
+  const lastBlockNumber = await getLastBlock();
+  if (isNaN(blockNumber) || await lastBlockNumber < blockNumber) {
+    throw new Error(`${blockNumber} is not valid block number last valid block is ${lastBlockNumber}`);
   }
+  return blockNumber;
 };
-
-/**
- * Return the eth network id for the current web3Instance
- * @returns integer
- */
-const getEtherNetworkId = () => web3Instance.version.network;
 
 const web3Utils =
 {
   isAddress,
-  validateBlockNumber,
+  validateBlock,
   getEtherNetworkId,
 };
 
