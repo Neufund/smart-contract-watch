@@ -5,11 +5,11 @@ import YAML from 'yamljs';
 import { defaultBlockNumber, watchingConfigPath, getEnv, saveStateFileName } from './config';
 import { isPathExist, validateBlockByNumber } from './utils';
 
-const rpcErrorMsg = '-n or --nodeAddress is required';
-const addressErrorMsg = '-a or --address is required';
-const quickModeErrorMsg = '-q or --quick-mode shouldn\'t have any value';
-const loggerErrorMsg = 'Logger is not correct type';
-const noArgsErrorMsg = 'No args are specified in the command or in the .watch.yml file';
+const rpcerrorMsg = '-n or --nodeAddress is required';
+const addresserrorMsg = '-a or --address is required';
+const quickModeerrorMsg = '-q or --quick-mode should only have bool values';
+const loggererrorMsg = 'Logger is not correct type';
+const noArgserrorMsg = 'No args are specified in the command or in the .watch.yml file';
 
 const defaultLogLevel = 'info';
 const defaultStartBlock = 0;
@@ -73,14 +73,17 @@ const handleSaveSate = (saveStatePath, from) => {
 /**
  * Checks if variable is a boolean value and returns values if true
  * @param {boolean} parameter
- * @param {string} ErrorMsg
+ * @param {string} errorMsg
  * @returns value
  *
  */
-const validateBool = (parameter, ErrorMsg) => {
-  if (typeof (parameter) !== 'boolean'
-    && parameter !== ('true' || 'false')) { throw new Error(ErrorMsg); }
-  return parameter;
+const validateBool = (parameter, errorMsg) => {
+  let finalParam;
+  if (typeof (parameter) === 'string') {
+    finalParam = parameter.toLowerCase() === 'true';
+  } else finalParam = parameter;
+  if (typeof (finalParam) !== 'boolean') { throw new Error(errorMsg); }
+  return finalParam;
 };
 
 const validateParamBasedOnValue = (parameter, validValues, errMsg) => {
@@ -105,21 +108,21 @@ export default (watchPath) => {
       .option('-n, --node-url [n]', 'Node address', handelInputValues('RPC_URL', watchConfig.nodeUrl))
       .option('-l, --log-level [n]', 'Log level', handelInputValues('LOG_LEVEL', watchConfig.logLevel, defaultLogLevel))
       .option('-o,--output-type [n]', 'Output type', handelInputValues('OUTPUT_TYPE', watchConfig.outputType, defaultOutputType))
-      .option('-e,--access-token [n]', 'etherscan accssess token', handelInputValues('ACCESS_TOKEN', watchConfig.accessToken, defaultAccessToken))
+      .option('-e,--access-token [n]', 'etherscan access token', handelInputValues('ACCESS_TOKEN', watchConfig.accessToken, defaultAccessToken))
       .parse(process.argv);
   }
-  if (typeof program === 'undefined') { throw new Error(noArgsErrorMsg); }
+  if (typeof program === 'undefined') { throw new Error(noArgserrorMsg); }
   const from = program.saveState ? handleSaveSate(program.saveState, program.from) : program.from;
   const saveState = program.saveState ?
     path.join(path.resolve(program.saveState), saveStateFileName) : null;
   return {
     from: validateBlockByNumber(from, program.to),
     to: program.to,
-    addresses: validateParamter(program.addresses, addressErrorMsg),
-    quickMode: validateBool(program.quick, quickModeErrorMsg),
+    addresses: validateParamter(program.addresses, addresserrorMsg),
+    quickMode: validateBool(program.quick, quickModeerrorMsg),
     lastBlockNumberFilePath: saveState,
-    nodeUrl: validateParamter(program.nodeUrl, rpcErrorMsg),
-    logLevel: validateParamBasedOnValue(program.logLevel, validLoggerValues, loggerErrorMsg),
+    nodeUrl: validateParamter(program.nodeUrl, rpcerrorMsg),
+    logLevel: validateParamBasedOnValue(program.logLevel, validLoggerValues, loggererrorMsg),
     outputType: program.outputType,
     accessToken: program.accessToken,
   };
