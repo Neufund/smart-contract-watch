@@ -1,2 +1,11 @@
 node_modules
 .git
+.env.example
+.eslintrc.json
+.watch.example.yml
+.travis.yml
+docker-compose.example.yml
+Dockerfile
+.nyc_output
+coverage
+.vscode

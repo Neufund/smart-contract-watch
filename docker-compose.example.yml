@@ -5,6 +5,7 @@ services:
     volumes:
       - "./:/usr/src/app"
     command: "yarn start"
+    restart: on-failure
     logging:
       driver: gelf
       options:
