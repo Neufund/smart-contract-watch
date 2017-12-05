@@ -55,29 +55,26 @@ const transactionHandler = async (transaction) => {
  * The main function that has the full steps
  */
 const main = async () => {
-  try {
-    const { from, to, addresses, quickMode,
-      lastBlockNumberFilePath, logLevel } = command();
-    setLoggerLevel(logLevel);
-    logger.debug('Start process');
+  const { from, to, addresses, quickMode,
+    lastBlockNumberFilePath, logLevel } = command();
+  setLoggerLevel(logLevel);
+  logger.debug('Start process');
 
-    const PromisifiedAbiObjects = addresses.map(async address => (
-      { address, abi: await getABI(address) }
-    ));
+  const PromisifiedAbiObjects = addresses.map(async address => (
+    { address, abi: await getABI(address) }
+  ));
 
-    (await Promise.all(PromisifiedAbiObjects)).forEach((object) => {
-      addressAbiMap[object.address.toLowerCase()] = new Decoder(object.abi);
-    });
+  (await Promise.all(PromisifiedAbiObjects)).forEach((object) => {
+    addressAbiMap[object.address.toLowerCase()] = new Decoder(object.abi);
+  });
 
-    const jsonRpc = new JsonRpc(addresses, from, to, lastBlockNumberFilePath, transactionHandler);
+  const jsonRpc = new JsonRpc(addresses, from, to, lastBlockNumberFilePath, transactionHandler);
 
-    await jsonRpc.scanBlocks(quickMode);
-    logger.info('Finish scanning all the blocks');
-  } catch (e) {
-    logError(e);
-  }
+  await jsonRpc.scanBlocks(quickMode);
+  logger.info('Finish scanning all the blocks');
 };
 
 main().catch((e) => {
   logError(e);
+  process.exit(1);
 });
