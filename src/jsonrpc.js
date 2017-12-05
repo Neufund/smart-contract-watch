@@ -1,10 +1,10 @@
 import fs from 'fs';
 import bluebird from 'bluebird';
-import { defaultBlockNumber, defaultFromBlockNumber, waitingTimeInMilliseconds } from './config';
+import { defaultBlockNumber, defaultFromBlockNumber, waitingTimeInMilliseconds, promiseTimeoutInMilliseconds } from './config';
 import { getWeb3 } from './web3/web3Provider';
 import logger, { logError } from './logger';
 import { isInArray, isQueriedTransaction, isContractCreationQueriedTransaction, isRegularQueriedTransaction, validateBlockByNumber } from './utils';
-import { isAddress, getLastBlock } from './web3/utils';
+import { isAddress } from './web3/utils';
 import initCustomRPCs from './web3/customRpc';
 
 export const rpcErrorCatch = (e) => {
@@ -31,6 +31,9 @@ export default class JsonRpc {
     this.currentBlock = fromBlock !== defaultBlockNumber ? fromBlock : defaultFromBlockNumber;
     this.toBlock = toBlock !== defaultBlockNumber ? toBlock : null;
     this.web3Instance = getWeb3().eth;
+    this.getBlockAsync = bluebird.promisify(this.web3Instance.getBlock);
+    this.getTransactionReceiptAsync = bluebird.promisify(this.web3Instance.getTransactionReceipt);
+    this.getLastBlockAsync = bluebird.promisify(this.web3Instance.getBlockNumber);
     this.callback = callback;
     if (!callback) {
       logger.info('Warning!: No callback function defined');
@@ -94,7 +97,7 @@ export default class JsonRpc {
   async scanTransaction(txn) {
     try {
       const txnReceipts =
-      await bluebird.promisify(this.web3Instance.getTransactionReceipt)(txn.hash);
+      await this.getTransactionReceiptAsync(txn.hash).timeout(promiseTimeoutInMilliseconds);
       const logs = txnReceipts.logs ? txnReceipts.logs.filter(log => isInArray(this.addresses,
         log.address)) : [];
 
@@ -184,22 +187,19 @@ export default class JsonRpc {
    * The main function that run scan all the blocks.
    */
   async scanBlocks(isFastMode = false) {
-    let lastBlockNumber = await getLastBlock();
+    let lastBlockNumber = await this.getLastBlockAsync().timeout(promiseTimeoutInMilliseconds);
     validateBlockByNumber(this.currentBlock, lastBlockNumber);
     if (this.toBlock) {
       validateBlockByNumber(this.toBlock, lastBlockNumber);
     }
-
     while ((this.toBlock && this.toBlock >= this.currentBlock) || (this.toBlock == null)) {
       try {
         if (this.currentBlock > lastBlockNumber) {
           logger.debug(`Waiting ${waitingTimeInMilliseconds / 1000} seconds until the incoming blocks`);
           await bluebird.delay(waitingTimeInMilliseconds);
-          lastBlockNumber = await getLastBlock();
+          lastBlockNumber = await this.getLastBlockAsync().timeout(promiseTimeoutInMilliseconds);
         } else {
-          const block = await bluebird.promisify(this.web3Instance.getBlock)(
-            this.currentBlock, true);
-          if (!block) { throw new Error('Invalid JSON RPC response:'); }
+          const block = await this.getBlockAsync(this.currentBlock, true).timeout(promiseTimeoutInMilliseconds);
           if (isFastMode) {
             await this.scanFastMode(block);
           } else {

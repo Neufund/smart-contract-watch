@@ -34,7 +34,7 @@
     "sinon": "^4.0.0"
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
+    "bluebird": "^3.5.1",
     "commander": "^2.11.0",
     "dotenv": "^4.0.0",
     "request": "^2.82.0",
