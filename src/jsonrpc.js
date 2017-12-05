@@ -199,7 +199,7 @@ export default class JsonRpc {
         } else {
           const block = await bluebird.promisify(this.web3Instance.getBlock)(
             this.currentBlock, true);
-
+          if (!block) { throw new Error('Invalid JSON RPC response:'); }
           if (isFastMode) {
             await this.scanFastMode(block);
           } else {
