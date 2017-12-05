@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import { expect } from 'chai';
 import graylogFormat from '../../src/output/graylogFormat';
-import web3Utils from '../../src/web3/utils';
+import * as web3Utils from '../../src/web3/utils';
 
 const networkId = {
   MAINNET: 1,

@@ -1,4 +1,4 @@
-import web3Utils from '../web3/utils';
+import { getEtherNetworkId } from '../web3/utils';
 import { networksById } from '../config';
 import Decoder from '../decoder';
 
@@ -17,7 +17,7 @@ const formatLogs = (logs) => {
   });
 };
 export default (transaction, decodedTransaction, decodedLogs) => ({
-  networkId: networksById[web3Utils.getEtherNetworkId()],
+  networkId: networksById[getEtherNetworkId()],
   blockHash: transaction.blockHash,
   blockNumber: transaction.blockNumber,
   fromAddress: transaction.from,

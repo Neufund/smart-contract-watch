@@ -199,7 +199,8 @@ export default class JsonRpc {
           await bluebird.delay(waitingTimeInMilliseconds);
           lastBlockNumber = await this.getLastBlockAsync().timeout(promiseTimeoutInMilliseconds);
         } else {
-          const block = await this.getBlockAsync(this.currentBlock, true).timeout(promiseTimeoutInMilliseconds);
+          const block =
+            await this.getBlockAsync(this.currentBlock, true).timeout(promiseTimeoutInMilliseconds);
           if (isFastMode) {
             await this.scanFastMode(block);
           } else {

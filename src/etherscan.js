@@ -2,7 +2,7 @@ import rp from 'request-promise';
 import fs from 'fs';
 import path from 'path';
 import { networksById } from './config';
-import web3Utils from './web3/utils';
+import { getEtherNetworkId } from './web3/utils';
 import { getCommandVars } from './command';
 
 
@@ -34,7 +34,7 @@ const validateResponse = (response) => {
  */
 
 const scrapeABI = async (address) => {
-  const networkID = web3Utils.getEtherNetworkId();
+  const networkID = getEtherNetworkId();
 
   if (!networksById[networkID]) {
     throw new Error('Network not supported!. Etherscan only supports, Mainnet, ropsten, rinkeby, kovan' +

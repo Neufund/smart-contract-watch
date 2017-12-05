@@ -7,7 +7,7 @@ import chaiAsPromised from 'chai-as-promised';
 import rp from 'request-promise';
 import { getABI } from '../src/etherscan';
 import { mockABI } from './mockedData/mockABI';
-import web3Utils from '../src/web3/utils';
+import * as web3Utils from '../src/web3/utils';
 
 chai.use(chaiAsPromised);
 chai.should();

@@ -11,11 +11,3 @@ export const isAddress = address => getWeb3().isAddress(address);
  * @returns integer
  */
 export const getEtherNetworkId = () => getWeb3().version.network;
-
-const web3Utils =
-{
-  isAddress,
-  getEtherNetworkId,
-};
-
-export default web3Utils;
