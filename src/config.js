@@ -20,3 +20,4 @@ export const networksById = {
 };
 
 export const waitingTimeInMilliseconds = 10000;
+export const promiseTimeoutInMilliseconds = 180000;

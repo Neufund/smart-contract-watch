@@ -28,6 +28,7 @@ export const setLoggerLevel = (logLevel) => {
 export const logError = (error, customMessage = null, isStack = true) => {
   switch (getCommandVars('outputType')) {
     case 'terminal':
+      logger.error(customMessage);
       logger.error(error.message);
       logger.error(error.stack);
       break;
