@@ -8,7 +8,7 @@ import { isAddress } from './web3/utils';
 import initCustomRPCs from './web3/customRpc';
 
 export const rpcErrorCatch = (e) => {
-  if (e.message.indexOf('Invalid JSON RPC response:') !== -1) {
+  if (e.message.includes('Invalid JSON RPC response')) {
     logError(e, `Network error occur, retry after ${waitingTimeInMilliseconds / 1000} seconds,
     from block number`, false);
   } else { throw new Error(e.message); }
