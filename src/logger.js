@@ -37,7 +37,7 @@ export const logError = (error, customMessage = null, isStack = true) => {
       logger.error(JSON.stringify({ type: 'Error',
         message: error.message,
         stack: isStack ? error.stack : null,
-        customMessage }));
+        details: customMessage }));
       break;
   }
 };
