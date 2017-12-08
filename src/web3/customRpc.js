@@ -1,7 +1,7 @@
 import Method from 'web3/lib/web3/method';
-import { getWeb3 } from './web3Provider';
 
-export const initCustomRPCs = () => {
+export const initCustomRPCs = (web3) => {
+  if (!web3.isConnected()) throw new Error('Web3 Provider is not set');
   const customRpcCall = new Method({
     name: 'getLogs',
     call: 'eth_getLogs',
@@ -9,7 +9,7 @@ export const initCustomRPCs = () => {
     inputFormatter: [filter => filter],
     outputFormatter: data => data,
   });
-  customRpcCall.setRequestManager(getWeb3()._requestManager);
+  customRpcCall.setRequestManager(web3.eth._requestManager);
   customRpcCall.attachToObject(customRpcCall);
   return customRpcCall;
 };

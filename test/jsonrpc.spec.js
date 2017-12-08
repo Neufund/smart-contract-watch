@@ -57,12 +57,14 @@ describe('JsonRpc', () => {
     sinon.stub(web3.eth, 'getBlock').withArgs().callsFake(getBlockFunction);
     sinon.stub(web3.eth, 'getTransactionReceipt').withArgs()
       .callsFake(getTransactionReceiptFunction);
+    sinon.stub(web3, 'isConnected').withArgs().returns(true);
     sinon.stub(web3.eth, 'getBlockNumber').withArgs().callsFake(getBlockNumber);
   });
 
   afterEach(() => {
     web3Provider.getWeb3.restore();
     web3.eth.getBlock.restore();
+    web3.isConnected.restore();
     web3.eth.getTransactionReceipt.restore();
     web3.eth.getBlockNumber.restore();
   });
