@@ -30,10 +30,11 @@ export default class JsonRpc {
 
     this.currentBlock = fromBlock !== defaultBlockNumber ? fromBlock : defaultFromBlockNumber;
     this.toBlock = toBlock !== defaultBlockNumber ? toBlock : null;
-    this.web3Instance = getWeb3().eth;
-    this.getBlockAsync = bluebird.promisify(this.web3Instance.getBlock);
-    this.getTransactionReceiptAsync = bluebird.promisify(this.web3Instance.getTransactionReceipt);
-    this.getLastBlockAsync = bluebird.promisify(this.web3Instance.getBlockNumber);
+    this.web3Instance = getWeb3();
+    this.getBlockAsync = bluebird.promisify(this.web3Instance.eth.getBlock);
+    this.getTransactionReceiptAsync =
+      bluebird.promisify(this.web3Instance.eth.getTransactionReceipt);
+    this.getLastBlockAsync = bluebird.promisify(this.web3Instance.eth.getBlockNumber);
     this.callback = callback;
     if (!callback) {
       logger.info('Warning!: No callback function defined');
@@ -154,7 +155,7 @@ export default class JsonRpc {
    * The main function that runs scan all the blocks without the transaction - fastmode -
    */
   async getLogsFromOneBlock() {
-    const blockNumber = getWeb3().toHex(this.currentBlock);
+    const blockNumber = this.web3Instance.toHex(this.currentBlock);
     const customRpc = initCustomRPCs();
     return this.addresses.map(address =>
       customRpc.getLogs({
