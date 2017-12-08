@@ -5,7 +5,7 @@ import { getWeb3 } from './web3/web3Provider';
 import logger, { logError } from './logger';
 import { isInArray, isQueriedTransaction, isContractCreationQueriedTransaction, isRegularQueriedTransaction, validateBlockByNumber } from './utils';
 import { isAddress } from './web3/utils';
-import initCustomRPCs from './web3/customRpc';
+import { initCustomRPCs } from './web3/customRpc';
 
 export const rpcErrorCatch = (e) => {
   if (e.message.includes('Invalid JSON RPC response')) {
@@ -30,10 +30,12 @@ export default class JsonRpc {
 
     this.currentBlock = fromBlock !== defaultBlockNumber ? fromBlock : defaultFromBlockNumber;
     this.toBlock = toBlock !== defaultBlockNumber ? toBlock : null;
-    this.web3Instance = getWeb3().eth;
-    this.getBlockAsync = bluebird.promisify(this.web3Instance.getBlock);
-    this.getTransactionReceiptAsync = bluebird.promisify(this.web3Instance.getTransactionReceipt);
-    this.getLastBlockAsync = bluebird.promisify(this.web3Instance.getBlockNumber);
+    this.web3Instance = getWeb3();
+    this.getLogs = initCustomRPCs(this.web3Instance).getLogs;
+    this.getBlockAsync = bluebird.promisify(this.web3Instance.eth.getBlock);
+    this.getTransactionReceiptAsync =
+      bluebird.promisify(this.web3Instance.eth.getTransactionReceipt);
+    this.getLastBlockAsync = bluebird.promisify(this.web3Instance.eth.getBlockNumber);
     this.callback = callback;
     if (!callback) {
       logger.info('Warning!: No callback function defined');
@@ -136,17 +138,15 @@ export default class JsonRpc {
       logger.debug(`Number of transactions are ${transactionsResult.length}`);
 
       if (this.callback) {
-        transactionsResult.forEach(async (txn) => {
+        return transactionsResult.forEach(async (txn) => {
           if (txn) {
-            try {
-              await this.callback(txn);
-            } catch (e) {
-              rpcErrorCatch(e);
-            }
+            await this.callback(txn);
           }
         });
       }
+      return transactionsResult;
     }
+    return null;
   }
 
 
@@ -154,10 +154,9 @@ export default class JsonRpc {
    * The main function that runs scan all the blocks without the transaction - fastmode -
    */
   async getLogsFromOneBlock() {
-    const blockNumber = getWeb3().toHex(this.currentBlock);
-    const customRpc = initCustomRPCs();
+    const blockNumber = this.web3Instance.toHex(this.currentBlock);
     return this.addresses.map(address =>
-      customRpc.getLogs({
+      this.getLogs({
         address,
         fromBlock: blockNumber,
         toBlock: blockNumber,
@@ -175,11 +174,8 @@ export default class JsonRpc {
     const logs = logsAsArray.reduce((a, b) => [...a, ...b], []);
     const blockTransactionsWithLogsList =
     this.getBlockAndTransactionLogsFormat(block, logs);
-
     if (this.callback) {
-      blockTransactionsWithLogsList.forEach((transaction) => {
-        this.callback(transaction);
-      });
+      blockTransactionsWithLogsList.forEach((transaction => this.callback(transaction)));
     }
   }
 
