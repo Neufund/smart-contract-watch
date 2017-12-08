@@ -5,7 +5,7 @@ import { getWeb3 } from './web3/web3Provider';
 import logger, { logError } from './logger';
 import { isInArray, isQueriedTransaction, isContractCreationQueriedTransaction, isRegularQueriedTransaction, validateBlockByNumber } from './utils';
 import { isAddress } from './web3/utils';
-import initCustomRPCs from './web3/customRpc';
+import { initCustomRPCs } from './web3/customRpc';
 
 export const rpcErrorCatch = (e) => {
   if (e.message.includes('Invalid JSON RPC response')) {
@@ -31,6 +31,7 @@ export default class JsonRpc {
     this.currentBlock = fromBlock !== defaultBlockNumber ? fromBlock : defaultFromBlockNumber;
     this.toBlock = toBlock !== defaultBlockNumber ? toBlock : null;
     this.web3Instance = getWeb3();
+    this.getLogs = initCustomRPCs(this.web3Instance).getLogs;
     this.getBlockAsync = bluebird.promisify(this.web3Instance.eth.getBlock);
     this.getTransactionReceiptAsync =
       bluebird.promisify(this.web3Instance.eth.getTransactionReceipt);
@@ -137,17 +138,15 @@ export default class JsonRpc {
       logger.debug(`Number of transactions are ${transactionsResult.length}`);
 
       if (this.callback) {
-        transactionsResult.forEach(async (txn) => {
+        return transactionsResult.forEach(async (txn) => {
           if (txn) {
-            try {
-              await this.callback(txn);
-            } catch (e) {
-              rpcErrorCatch(e);
-            }
+            await this.callback(txn);
           }
         });
       }
+      return transactionsResult;
     }
+    return null;
   }
 
 
@@ -156,9 +155,8 @@ export default class JsonRpc {
    */
   async getLogsFromOneBlock() {
     const blockNumber = this.web3Instance.toHex(this.currentBlock);
-    const customRpc = initCustomRPCs();
     return this.addresses.map(address =>
-      customRpc.getLogs({
+      this.getLogs({
         address,
         fromBlock: blockNumber,
         toBlock: blockNumber,
@@ -177,13 +175,7 @@ export default class JsonRpc {
     const blockTransactionsWithLogsList =
     this.getBlockAndTransactionLogsFormat(block, logs);
     if (this.callback) {
-      blockTransactionsWithLogsList.forEach((transaction) => {
-        try {
-          this.callback(transaction);
-        } catch (e) {
-          rpcErrorCatch(e);
-        }
-      });
+      blockTransactionsWithLogsList.forEach((transaction => this.callback(transaction)));
     }
   }
 

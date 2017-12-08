@@ -57,6 +57,7 @@ describe('JsonRpc', () => {
     sinon.stub(web3.eth, 'getBlock').withArgs().callsFake(getBlockFunction);
     sinon.stub(web3.eth, 'getTransactionReceipt').withArgs()
       .callsFake(getTransactionReceiptFunction);
+    sinon.stub(web3, 'isConnected').withArgs().returns(true);
     sinon.stub(web3.eth, 'getBlockNumber').withArgs().callsFake(getBlockNumber);
   });
 
