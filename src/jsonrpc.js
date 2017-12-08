@@ -5,7 +5,7 @@ import { getWeb3 } from './web3/web3Provider';
 import logger, { logError } from './logger';
 import { isInArray, isQueriedTransaction, isContractCreationQueriedTransaction, isRegularQueriedTransaction, validateBlockByNumber } from './utils';
 import { isAddress } from './web3/utils';
-import initCustomRPCs from './web3/customRpc';
+import { initCustomRPCs } from './web3/customRpc';
 
 export const rpcErrorCatch = (e) => {
   if (e.message.includes('Invalid JSON RPC response')) {
@@ -34,6 +34,7 @@ export default class JsonRpc {
     this.getBlockAsync = bluebird.promisify(this.web3Instance.eth.getBlock);
     this.getTransactionReceiptAsync =
       bluebird.promisify(this.web3Instance.eth.getTransactionReceipt);
+    this.getLogs = initCustomRPCs(this.web3Instance).getLogs;
     this.getLastBlockAsync = bluebird.promisify(this.web3Instance.eth.getBlockNumber);
     this.callback = callback;
     if (!callback) {
@@ -156,9 +157,8 @@ export default class JsonRpc {
    */
   async getLogsFromOneBlock() {
     const blockNumber = this.web3Instance.toHex(this.currentBlock);
-    const customRpc = initCustomRPCs();
     return this.addresses.map(address =>
-      customRpc.getLogs({
+      this.getLogs({
         address,
         fromBlock: blockNumber,
         toBlock: blockNumber,

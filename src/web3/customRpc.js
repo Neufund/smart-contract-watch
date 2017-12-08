@@ -1,7 +1,7 @@
 import Method from 'web3/lib/web3/method';
 import { getWeb3 } from './web3Provider';
 
-const initCustomRPCs = () => {
+export const initCustomRPCs = () => {
   const customRpcCall = new Method({
     name: 'getLogs',
     call: 'eth_getLogs',
@@ -13,5 +13,3 @@ const initCustomRPCs = () => {
   customRpcCall.attachToObject(customRpcCall);
   return customRpcCall;
 };
-
-export default initCustomRPCs;
