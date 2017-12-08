@@ -17,7 +17,7 @@ const formatLogs = (logs) => {
   });
 };
 export default (transaction, decodedTransaction, decodedLogs) => ({
-  networkId: networksById[getEtherNetworkId()],
+  networkId: transaction.net,
   blockHash: transaction.blockHash,
   blockNumber: transaction.blockNumber,
   fromAddress: transaction.from,
