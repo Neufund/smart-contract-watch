@@ -7,10 +7,11 @@ import { isInArray, isQueriedTransaction, isContractCreationQueriedTransaction, 
 import { isAddress } from './web3/utils';
 import { initCustomRPCs } from './web3/customRpc';
 
-export const rpcErrorCatch = (e) => {
+export const rpcErrorCatch = async (e) => {
   if (e.message.includes('Invalid JSON RPC response')) {
     logError(e, `Network error occur, retry after ${waitingTimeInMilliseconds / 1000} seconds,
     from block number`, false);
+    await bluebird.delay(waitingTimeInMilliseconds);
   } else { throw new Error(e.message); }
 };
 
@@ -112,7 +113,7 @@ export default class JsonRpc {
         return JsonRpc.getTransactionFormat(txn, txnReceipts, logs);
       }
     } catch (e) {
-      rpcErrorCatch(e);
+      await rpcErrorCatch(e);
     }
     return null;
   }
@@ -132,7 +133,7 @@ export default class JsonRpc {
           const singleTransactionResult = await this.scanTransaction(txn);
           if (singleTransactionResult) { transactionsResult.push(singleTransactionResult); }
         } catch (e) {
-          rpcErrorCatch(e);
+          await rpcErrorCatch(e);
         }
       }
       logger.debug(`Number of transactions are ${transactionsResult.length}`);
@@ -217,7 +218,7 @@ export default class JsonRpc {
           }
         }
       } catch (e) {
-        rpcErrorCatch(e);
+        await rpcErrorCatch(e);
         await bluebird.delay(waitingTimeInMilliseconds);
       } // end catch
     } // end loop

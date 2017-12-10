@@ -1,11 +1,15 @@
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import Web3 from 'web3';
+import chaiAsPromised from 'chai-as-promised';
 import JsonRpc, { rpcErrorCatch } from '../src/jsonrpc';
 import logger from '../src/logger';
 import blockTemplate from './mockedData/block';
 import transactionReceiptTemplate from './mockedData/transactionReceipt';
 import * as web3Provider from '../src/web3/web3Provider';
+
+chai.use(chaiAsPromised);
+chai.should();
 
 let web3;
 logger.transports.console.level = 'error';
@@ -104,13 +108,15 @@ describe('JsonRpc', () => {
 });
 
 describe('rpcErrorCatch', () => {
-  it('should not throw an error', () => {
+  it('should not throw an error', async () => {
     const error = { message: 'Invalid JSON RPC response:' };
-    expect(() => rpcErrorCatch(error)).to.not.throw();
+    //
+    rpcErrorCatch(error).should.be.fulfilled; // eslint-disable-line no-unused-expressions
   });
 
   it('should throw an error', () => {
     const error = { message: 'STRANGE ERROR MESSAGE' };
-    expect(() => rpcErrorCatch(error)).to.throw();
+    rpcErrorCatch(error).should.be.rejectedWith({ message: 'STRANGE ERROR MESSAGE' });
   });
 });
+// TODO: move rpcErrorCatch out of jsonRPC test suite 
