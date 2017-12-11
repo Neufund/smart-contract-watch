@@ -27,7 +27,7 @@ describe('GrayLog', () => {
       gasPrice: '61000000000',
       hash: '0x5195805a5b9a4e7f4c0bca8efe6b6548937d1e52c1532735f9ff4088900604b3',
       input: '0xefc81a8c',
-      networkId: null,
+      networkId: 1,
       nonce: 22,
       publicKey: '0xd49c5ead1df64a1d6379e9a744f83b70159b3a7362065f1b76632656741b66cace4fe114afb1c3be543313d347ee71f9f9f347f81eda9524450e746aaee517fe',
       r: '0xd66275fb12c30f7a4a1957ee85df63525fded2f82703c5a9a1347b5cc18a2a52',
@@ -52,7 +52,7 @@ describe('GrayLog', () => {
 
 
     const output = graylogFormat(transaction, decodedInputDataResult, decodedLogs);
-    expect(output).to.deep.equal({ networkId: 'api',
+    expect(output).to.deep.equal({ networkId: 1,
       blockHash: '0xe558edfe9f61140c63ce2daf8f29dcbe395e74005a597659f06706acc599bad4',
       blockNumber: 2607810,
       fromAddress: '0xebff84bbef423071e604c361bba677f5593def4e',
