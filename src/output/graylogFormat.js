@@ -1,5 +1,3 @@
-import Decoder from '../decoder';
-
 const formatLogs = (logs) => {
   if (!logs) return [];
   return logs.map((log) => {
@@ -22,7 +20,7 @@ export default (transaction, decodedTransaction, decodedLogs) => ({
   toAddress: transaction.to,
   transactionHash: transaction.hash,
   input: transaction.creates ?
-    Decoder.extractConstructorFromBytecode(transaction.input) : transaction.input,
+    decodedTransaction.constructorData : transaction.input,
   gas: transaction.gas,
   gasPrice: transaction.gasPrice,
   status: transaction.status,

@@ -2,7 +2,7 @@ import rp from 'request-promise';
 import fs from 'fs';
 import path from 'path';
 import { networksById } from './config';
-import { getEtherNetworkId } from './web3/utils';
+import { getEtherNetworkId, isAddress } from './web3/utils';
 import { getCommandVars } from './command';
 
 
@@ -34,6 +34,7 @@ const validateResponse = (response) => {
  */
 
 const scrapeABI = async (address) => {
+  if (!isAddress(address)) throw new Error(`Address ${address} is not a valid Ethereum address`);
   const networkID = getEtherNetworkId();
 
   if (!networksById[networkID]) {

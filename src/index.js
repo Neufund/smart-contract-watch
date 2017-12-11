@@ -1,6 +1,7 @@
 import logger, { logError, setLoggerLevel } from './logger';
 import command, { getCommandVars } from './command';
 import Decoder from './decoder';
+import { isAddress } from './web3/utils';
 import JsonRpc from './jsonrpc';
 import { getABI } from './etherscan';
 import output from './output';
@@ -32,19 +33,25 @@ const transactionHandler = async (transaction) => {
         .decodeConstructor(transaction.input);
       decodedLogs = null;
     } catch (error) {
-      logger.error(`txHash: ${transaction.hash} ${error.message}`);
+      logError(error,
+        `txHash: ${transaction.hash} ${error.message}`);
+      return;
     }
   } else {
     try {
       decodedInputDataResult = addressAbiMap[transaction.to].decodeMethod(transaction.input);
     } catch (error) {
-      logger.error(`txHash: ${transaction.hash} ${error.message}`);
+      logError(error,
+        `txHash: ${transaction.hash} ${error.message}`);
+      return;
     }
 
     try {
       decodedLogs = addressAbiMap[transaction.to].decodeLogs(transaction.logs);
     } catch (error) {
-      logger.error(`txHash: ${transaction.hash} ${error.message}`);
+      logError(error,
+        `txHash: ${transaction.hash} ${error.message}`);
+      return;
     }
   }
   output({ transaction, decodedInputDataResult, decodedLogs }, getCommandVars('outputType'));
@@ -59,7 +66,7 @@ const main = async () => {
     lastBlockNumberFilePath, logLevel } = command();
   setLoggerLevel(logLevel);
   logger.debug('Start process');
-
+  addresses.forEach((address) => { if (!isAddress(address)) throw new Error(`Address ${address} is not a valid ethereum address`); });
   const PromisifiedAbiObjects = addresses.map(async address => (
     { address, abi: await getABI(address) }
   ));
