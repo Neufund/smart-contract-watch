@@ -142,7 +142,7 @@ export default class JsonRpc {
         transactionsResult.forEach(async (txn) => {
           if (txn) {
             try {
-              await this.callback(txn);
+              this.callback(txn);
             } catch (e) {
               rpcErrorCatch(e);
             }
