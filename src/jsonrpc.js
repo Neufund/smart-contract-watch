@@ -81,6 +81,10 @@ export default class JsonRpc {
       isRegularQueriedTransaction({ addresses: this.addresses, QueriedAddress: transaction.to })
     ).forEach((transaction) => {
       const transactionObject = transaction;
+      // old blocks have networkId null
+      if (!transactionObject.networkId) {
+        transactionObject.networkId = this.web3Instance.version.network;
+      }
       if (typeof transactionLogs[transactionObject.hash] !== 'undefined') {
         transactionObject.logs = transactionLogs[transactionObject.hash];
       } else { transactionObject.logs = []; }
@@ -139,10 +143,15 @@ export default class JsonRpc {
       logger.debug(`Number of transactions are ${transactionsResult.length}`);
 
       if (this.callback) {
-        transactionsResult.forEach(async (txn) => {
+        transactionsResult.forEach((txn) => {
           if (txn) {
+            const queriedTxn = txn;
+            // old blocks have networkId null
+            if (!queriedTxn.networkId) {
+              queriedTxn.networkId = this.web3Instance.version.network;
+            }
             try {
-              this.callback(txn);
+              this.callback(queriedTxn);
             } catch (e) {
               rpcErrorCatch(e);
             }
