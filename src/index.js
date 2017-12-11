@@ -33,25 +33,28 @@ const transactionHandler = async (transaction) => {
         .decodeConstructor(transaction.input);
       decodedLogs = null;
     } catch (error) {
-      return logError(error,
+      logError(error,
         `txHash: ${transaction.hash} ${error.message}`);
+      return;
     }
   } else {
     try {
       decodedInputDataResult = addressAbiMap[transaction.to].decodeMethod(transaction.input);
     } catch (error) {
-      return logError(error,
+      logError(error,
         `txHash: ${transaction.hash} ${error.message}`);
+      return;
     }
 
     try {
       decodedLogs = addressAbiMap[transaction.to].decodeLogs(transaction.logs);
     } catch (error) {
-      return logError(error,
+      logError(error,
         `txHash: ${transaction.hash} ${error.message}`);
+      return;
     }
   }
-  return output({ transaction, decodedInputDataResult, decodedLogs }, getCommandVars('outputType'));
+  output({ transaction, decodedInputDataResult, decodedLogs }, getCommandVars('outputType'));
 };
 
 
