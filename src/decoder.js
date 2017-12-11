@@ -59,28 +59,35 @@ export default class Decoder {
    * @return {}
    */
   decodeConstructor(contractCreationBytecode) {
-    if (this.methodIDs.constructor.type !== 'constructor') throw new Error(`Expected constructor got${this.methodIDs.constructor.type}`);
-    const abiItem = this.methodIDs.constructor;
-    if (abiItem) {
-      const params = abiItem.inputs.map(item => item.type);
-      const constructorData = Decoder.extractConstructorFromBytecode(contractCreationBytecode);
-      const decoded = SolidityCoder.decodeParams(params, constructorData);
-      return {
-        name: abiItem.type,
-        params: decoded.map((param, index) => {
-          let parsedParam = param;
-          if (abiItem.inputs[index].type.indexOf('uint') !== -1) {
-            parsedParam = Decoder.parseParams(param);
-          }
-          return {
-            name: abiItem.inputs[index].name,
-            value: parsedParam,
-            type: abiItem.inputs[index].type,
-          };
-        }),
-      };
+    try {
+      if (this.methodIDs.constructor.type !== 'constructor') throw new Error(`Expected constructor got${this.methodIDs.constructor.type}`);
+      const abiItem = this.methodIDs.constructor;
+      if (abiItem) {
+        const params = abiItem.inputs.map(item => item.type);
+        const constructorData =
+          Decoder.extractConstructorFromBytecode(contractCreationBytecode, params);
+        const decoded = SolidityCoder.decodeParams(params, constructorData);
+        return {
+          name: abiItem.type,
+          params: decoded.map((param, index) => {
+            let parsedParam = param;
+            if (abiItem.inputs[index].type.indexOf('uint') !== -1) {
+              parsedParam = Decoder.parseParams(param);
+            }
+            return {
+              name: abiItem.inputs[index].name,
+              value: parsedParam,
+              type: abiItem.inputs[index].type,
+            };
+          }),
+          constructorData,
+        };
+      }
+    } catch (e) {
+      if (e.message === 'Dynamic types found in a ByteCode file with no "Metadata swarm"') { return { name: 'UNDECODED', params: [{ name: 'rawData', value: e.message, type: 'Error Message' }] }; }
+      throw e;
     }
-    return null;
+    return false;
   }
   static parseParams(param) {
     return Array.isArray(param) ?
@@ -96,7 +103,7 @@ export default class Decoder {
    */
   decodeMethod(inputData) {
     const errorObject = { name: 'UNDECODED', params: [{ name: 'rawData', value: inputData, type: 'data' }] };
-    if (typeof inputData !== 'string') throw new Error(`Expected sting got ${typeof inputData}`);
+    if (typeof inputData !== 'string') throw new Error(`Expected string got ${typeof inputData}`);
     if (inputData === '0x') return '';
 
     const methodID = inputData.slice(2, 10);
@@ -192,14 +199,28 @@ export default class Decoder {
   * @param {string}
   * @return {string}
   */
-  static extractConstructorFromBytecode(contractCreationBytecode) {
+  static extractConstructorFromBytecode(contractCreationBytecode, params) {
     // http://solidity.readthedocs.io/en/develop/metadata.html#encoding-of-the-metadata-hash-in-the-bytecode
+    if (!contractCreationBytecode) throw new Error('contractCreationBytecode is null or undefined');
+    if (!params) throw new Error('Params is null or undefined');
+
     const endOfBytCodeSig = 'a165627a7a72305820';
     const bzzrtOffset = 82;
     const endofByteCode = 4;
+
+    const solidityTypes = SolidityCoder.getSolidityTypes(params);
+
+
     const offset = contractCreationBytecode.indexOf(endOfBytCodeSig);
     if (contractCreationBytecode.slice(offset + bzzrtOffset,
-      offset + bzzrtOffset + 4) !== '0029') { throw new Error('Decoder cannot find Metadata swarm file in bytecode '); }
+      offset + bzzrtOffset + 4) !== '0029') {
+      solidityTypes.forEach((solidityType, i) => {
+        if (solidityType.isDynamicType(params[i]) ||
+          solidityType.isDynamicArray(params[i]) ||
+            solidityType.isStaticArray(params[i])) { throw new Error('Dynamic types found in a ByteCode file with no "Metadata swarm"'); }
+      });
+      return contractCreationBytecode.slice(-64 * params.length);
+    }
     return contractCreationBytecode.slice(offset + bzzrtOffset + endofByteCode);
   }
 
