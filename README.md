@@ -45,6 +45,8 @@ ex, `-s ./example-file-path` or `--save-state ./example-file-path`.
 
 `-e or --access-token` Etherscan access token, used to access etherscan for ABI importing. 
 
+`-c or --colors` use colors. 1 for ANSI, 2 for Chalk, any other number for none. Default is ANSI. 
+
 ### ENV Variables 
 Environmental variables come second in priority, you can specify every parameter indicated as an ENV variable. Additionally you can mix between different settings if convenient for your application.In your `.env` you can specify parameters as
 
@@ -65,6 +67,8 @@ Environmental variables come second in priority, you can specify every parameter
 `OUTPUT_TYPE`
 
 `ACCESS_TOKEN`
+
+`COLORS` 1 / 2 / any
 
 The inputs are very similar to when using CLI only `QUICK_MODE` is different in the sense that it can use true/false values
 
@@ -88,6 +92,8 @@ Smart Contract watch supports configuration files. You must insert all your conf
 `-outputType`
 
 `-accessToken`
+
+`-colors`
 
 ## Smart Contract ABI
 In order for the tool to successfully decode transactions. ABIs for the smart contracts must be provided this is done automatically by sending requests via [Etherscan's Contracts api](https://etherscan.io/apis#contracts). 

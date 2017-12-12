@@ -17,6 +17,7 @@ const defaultQuickMode = false;
 const defaultSaveState = null;
 const defaultOutputType = 'terminal';
 const defaultAccessToken = '';
+const defaultColors = '1'; // No color 1 Ansi, 2 Chalk
 
 const validLoggerValues = ['info', 'error', 'debug'];
 
@@ -109,6 +110,7 @@ export default (watchPath) => {
       .option('-l, --log-level [n]', 'Log level', handelInputValues('LOG_LEVEL', watchConfig.logLevel, defaultLogLevel))
       .option('-o,--output-type [n]', 'Output type', handelInputValues('OUTPUT_TYPE', watchConfig.outputType, defaultOutputType))
       .option('-e,--access-token [n]', 'etherscan access token', handelInputValues('ACCESS_TOKEN', watchConfig.accessToken, defaultAccessToken))
+      .option('-c,--colors [n]', 'use color 1 for ansi, 2 for chalk, any other for none', handelInputValues('COLORS', watchConfig.colors, defaultColors))
       .parse(process.argv);
   }
   if (typeof program === 'undefined') { throw new Error(noArgserrorMsg); }
@@ -120,6 +122,7 @@ export default (watchPath) => {
     to: program.to,
     addresses: validateParamter(program.addresses, addresserrorMsg),
     quickMode: validateBool(program.quick, quickModeerrorMsg),
+    colors: program.colors,
     lastBlockNumberFilePath: saveState,
     nodeUrl: validateParamter(program.nodeUrl, rpcerrorMsg),
     logLevel: validateParamBasedOnValue(program.logLevel, validLoggerValues, loggererrorMsg),

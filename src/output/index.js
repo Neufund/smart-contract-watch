@@ -12,6 +12,6 @@ export default (data, type = 'terminal') => {
         data.decodedInputDataResult, data.decodedLogs)));
       break;
     default:
-      throw new Error(`${type} output module is undefind`);
+      throw new Error(`${type} output module is undefined`);
   }
 };
