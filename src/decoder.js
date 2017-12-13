@@ -102,7 +102,7 @@ export default class Decoder {
    * @return {}
    */
   decodeMethod(inputData) {
-    const errorObject = { name: 'UNDECODED', params: [{ name: 'rawData', value: inputData, type: 'data' }] };
+    const errorObject = { name: 'UNDECODED', params: [{ name: 'rawData', value: JSON.stringify(inputData), type: 'data' }] };
     if (typeof inputData !== 'string') throw new Error(`Expected string got ${typeof inputData}`);
     if (inputData === '0x') return '';
 
@@ -137,7 +137,7 @@ export default class Decoder {
    * @return [{}]
    */
   decodeLogs(logs) {
-    const errorObject = { name: 'UNDECODED', events: [{ name: 'rawLogs', value: logs, type: 'logs' }] };
+    const errorObject = { name: 'UNDECODED', events: [{ name: 'rawLogs', value: JSON.stringify(logs), type: 'logs' }] };
     const decodedLogs = logs.map((logItem) => {
       if (!logItem.topics.length) throw new Error(`Problem with logs at ${logItem.topics}`);
       const methodID = logItem.topics[0].slice(2);
