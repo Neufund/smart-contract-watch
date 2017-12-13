@@ -151,7 +151,7 @@ export default class JsonRpc {
               queriedTxn.networkId = this.web3Instance.version.network;
             }
             try {
-              this.callback(queriedTxn);
+              this.callback(queriedTxn, this.addresses);
             } catch (e) {
               rpcErrorCatch(e);
             }
@@ -189,7 +189,7 @@ export default class JsonRpc {
 
     if (this.callback) {
       blockTransactionsWithLogsList.forEach((transaction) => {
-        this.callback(transaction);
+        this.callback(transaction, this.addresses);
       });
     }
   }

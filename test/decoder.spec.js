@@ -31,7 +31,7 @@ describe('Decoder Module', () => {
     it('should return encoded if the ABI for this specific address is not added', () => {
       const dataSample1 = '0000000000000000000000000c53fe380aba335d144b6f0dbc6b588633f783d7000000000000000000000000f3a85b1c8818629e52d61';
       const decodedInput = decoderInstance.decodeMethod(dataSample1);
-      expect(decodedInput).to.deep.equal({ name: 'UNDECODED', params: [{ name: 'rawData', value: '0000000000000000000000000c53fe380aba335d144b6f0dbc6b588633f783d7000000000000000000000000f3a85b1c8818629e52d61', type: 'data' }] });
+      expect(decodedInput).to.deep.equal({ name: 'UNDECODED', params: [{ name: 'rawData', value: JSON.stringify('0000000000000000000000000c53fe380aba335d144b6f0dbc6b588633f783d7000000000000000000000000f3a85b1c8818629e52d61'), type: 'data' }] });
     });
     it('should return an empty string if inputData was empty', () => {
       const dataSample1 = '0x';
@@ -70,7 +70,7 @@ describe('Decoder Module', () => {
     });
     it('should return encoded if the ABI for this specific address is not added', () => {
       const decodedInput = decoderInstance.decodeLogs(errTestLogs);
-      expect(decodedInput).to.deep.contain({ name: 'UNDECODED', events: [{ name: 'rawLogs', value: errTestLogs, type: 'logs' }] });
+      expect(decodedInput).to.deep.contain({ name: 'UNDECODED', events: [{ name: 'rawLogs', value: JSON.stringify(errTestLogs), type: 'logs' }] });
     });
   });
 });

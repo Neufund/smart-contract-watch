@@ -48,11 +48,11 @@ const transactionHandler = async (transaction, addresses) => {
 
     try {
       decodedLogs = transaction.logs.map((log) => {
-        let decodedLog;
+        let decodedLog = [];
         /* eslint-disable no-restricted-syntax */
         for (const address of addresses) {
           decodedLog = addressAbiMap[address].decodeLogs([log]);
-          if (decodedLog[0].name !== 'UNDECODED') {
+          if (decodedLog.length > 0 && decodedLog[0].name !== 'UNDECODED') {
             return decodedLog[0];
           }
         }
