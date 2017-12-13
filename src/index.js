@@ -24,7 +24,7 @@ import { isContractCreationTransaction } from './utils';
 
 const addressAbiMap = {};
 
-const transactionHandler = async (transaction) => {
+const transactionHandler = async (transaction, addresses) => {
   let decodedLogs;
   let decodedInputDataResult;
   if (isContractCreationTransaction(transaction.to)) {
@@ -47,7 +47,18 @@ const transactionHandler = async (transaction) => {
     }
 
     try {
-      decodedLogs = addressAbiMap[transaction.to].decodeLogs(transaction.logs);
+      decodedLogs = transaction.logs.map((log) => {
+        let decodedLog;
+        /* eslint-disable no-restricted-syntax */
+        for (const address of addresses) {
+          decodedLog = addressAbiMap[address].decodeLogs([log]);
+          if (decodedLog[0].name !== 'UNDECODED') {
+            return decodedLog[0];
+          }
+        }
+        /* eslint-enable */
+        return decodedLog;
+      });
     } catch (error) {
       logError(error,
         `txHash: ${transaction.hash} ${error.message}`);
