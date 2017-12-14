@@ -25,13 +25,12 @@ import { isContractCreationTransaction } from './utils';
 const addressAbiMap = {};
 
 const transactionHandler = async (transaction, addresses) => {
-  let decodedLogs;
+  let decodedLogs = [];
   let decodedInputDataResult;
   if (isContractCreationTransaction(transaction.to)) {
     try {
       decodedInputDataResult = addressAbiMap[transaction.contractAddress || transaction.creates]
         .decodeConstructor(transaction.input);
-      decodedLogs = null;
     } catch (error) {
       logError(error,
         `txHash: ${transaction.hash} ${error.message}`);
@@ -45,19 +44,12 @@ const transactionHandler = async (transaction, addresses) => {
         `txHash: ${transaction.hash} ${error.message}`);
       return;
     }
-
     try {
       decodedLogs = transaction.logs.map((log) => {
-        let decodedLog = [];
-        /* eslint-disable no-restricted-syntax */
-        for (const address of addresses) {
-          decodedLog = addressAbiMap[address].decodeLogs([log]);
-          if (decodedLog.length > 0 && decodedLog[0].name !== 'UNDECODED') {
-            return decodedLog[0];
-          }
+        if (addresses.some(address => address === log.address)) {
+          return addressAbiMap[log.address].decodeSingleLog(log);
         }
-        /* eslint-enable */
-        return decodedLog;
+        return { name: 'UNDECODED', events: [{ name: 'rawLogs', value: JSON.stringify(log), type: 'logs' }] };
       });
     } catch (error) {
       logError(error,

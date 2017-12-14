@@ -37,7 +37,6 @@ describe('Decoder Module', () => {
     it('should throw if ABI was undefined', () => {
       expect(() => new Decoder(null)).to.throw('Expected ABI array, got object');
     });
-  });
     it('should return encoded if the ABI for this specific address is not added', () => {
       const dataSample1 = '0000000000000000000000000c53fe380aba335d144b6f0dbc6b588633f783d7000000000000000000000000f3a85b1c8818629e52d61';
       const decodedInput = decoderInstance.decodeMethod(dataSample1);
