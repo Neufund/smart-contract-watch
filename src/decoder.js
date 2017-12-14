@@ -129,7 +129,20 @@ export default class Decoder {
     }
     return errorObject;
   }
-
+  /**
+   * Decode transaction logs
+   *
+   * @param Object logs
+   * @return [{}]
+   */
+  decodeSingleLog(log) {
+    if (log.length > 1 || Array.isArray(log)) throw new Error('expected single log, received array or undefined');
+    const decodedLog = this.decodeLogs([log]);
+    if (decodedLog.length > 0) {
+      return decodedLog[0];
+    }
+    return { name: 'UNDECODED', events: [{ name: 'rawLogs', value: JSON.stringify(log), type: 'logs' }] };
+  }
   /**
    * Decode transaction logs
    *
@@ -139,7 +152,7 @@ export default class Decoder {
   decodeLogs(logs) {
     const errorObject = { name: 'UNDECODED', events: [{ name: 'rawLogs', value: JSON.stringify(logs), type: 'logs' }] };
     const decodedLogs = logs.map((logItem) => {
-      if (!logItem.topics.length) throw new Error(`Problem with logs at ${logItem.topics}`);
+      if (!logItem.topics.length) throw new Error(`Problem with logs at ${JSON.stringify(logItem.topics)}`);
       const methodID = logItem.topics[0].slice(2);
       const method = this.methodIDs[methodID];
       if (method) {
