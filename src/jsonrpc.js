@@ -212,6 +212,7 @@ export default class JsonRpc {
         } else {
           const block =
             await this.getBlockAsync(this.currentBlock, true).timeout(promiseTimeoutInMilliseconds);
+          if (!block) throw new Error(`Web3 failed to get Block ${this.currentBlock}`);
           if (isFastMode) {
             await this.scanFastMode(block);
           } else {
