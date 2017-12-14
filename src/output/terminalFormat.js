@@ -2,7 +2,7 @@ export default (data) => {
   const txHash = data.transaction.hash;
   let functionName = '';
   let functionParams = '';
-  let eventText = '';
+  let logEvents = [];
   let extraMessage = '';
   if (data.decodedInputDataResult) {
     functionName = data.decodedInputDataResult.name;
@@ -13,8 +13,8 @@ export default (data) => {
   }
 
   if (data.decodedLogs) {
-    data.decodedLogs.forEach((log) => {
-      eventText = `${log.name}(`;
+    logEvents = data.decodedLogs.map((log) => {
+      let eventText = `${log.name}(`;
       log.events.forEach((i, idx, events) => {
         eventText += `${events[idx].name}=${events[idx].value}`;
         if (idx !== events.length - 1) {
@@ -22,6 +22,7 @@ export default (data) => {
         }
       });
       eventText += ')';
+      return eventText;
     });
   }
   if (data.transaction.status === 1 || data.transaction.status === 0) {
@@ -30,5 +31,5 @@ export default (data) => {
     extraMessage = 'Suspected fail';
   }
 
-  return `tshash:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`;
+  return `tshash:${txHash} ${functionName}(${functionParams}) ${logEvents} ${extraMessage}`;
 };
