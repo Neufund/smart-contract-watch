@@ -18,6 +18,10 @@ const defaultSaveState = null;
 const defaultOutputType = 'terminal';
 const defaultAccessToken = '';
 
+const defaultLogglyAccessToken = '';
+const defaultLogglySubDomain = '';
+const defaultLogglyTag = '';
+
 const validLoggerValues = ['info', 'error', 'debug'];
 
 /**
@@ -109,6 +113,9 @@ export default (watchPath) => {
       .option('-l, --log-level [n]', 'Log level', handelInputValues('LOG_LEVEL', watchConfig.logLevel, defaultLogLevel))
       .option('-o,--output-type [n]', 'Output type', handelInputValues('OUTPUT_TYPE', watchConfig.outputType, defaultOutputType))
       .option('-e,--access-token [n]', 'etherscan access token', handelInputValues('ACCESS_TOKEN', watchConfig.accessToken, defaultAccessToken))
+      .option('--loggly-token,--loggly-token [n]', 'loggly access token', handelInputValues('LOGGLY_ACCESS_TOKEN', watchConfig.logglyAccessToken, defaultLogglyAccessToken))
+      .option('--loggly-subdomain,--loggly-subdomain [n]', 'loggly subdomain', handelInputValues('LOGGLY_SUB_DOMAIN', watchConfig.logglySubDomain, defaultLogglySubDomain))
+      .option('--loggly-tag,--loggly-tag [n]', 'loggly tag', handelInputValues('LOGGLY_TAG', watchConfig.logglyTag, defaultLogglyTag))
       .parse(process.argv);
   }
   if (typeof program === 'undefined') { throw new Error(noArgserrorMsg); }
@@ -125,6 +132,9 @@ export default (watchPath) => {
     logLevel: validateParamBasedOnValue(program.logLevel, validLoggerValues, loggererrorMsg),
     outputType: program.outputType,
     accessToken: program.accessToken,
+    logglyAccessToken: program.logglyToken,
+    logglySubDomain: program.logglySubdomain,
+    logglyTag: program.logglyTag
   };
 };
 
