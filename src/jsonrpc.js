@@ -12,7 +12,10 @@ export const rpcErrorCatch = async (e) => {
     logError(e, `Network error occur, retry after ${waitingTimeInMilliseconds / 1000} seconds,
     from block number`, false);
     await bluebird.delay(waitingTimeInMilliseconds);
-  } else { throw new Error(e.message); }
+  } else {
+    logError(e);
+    process.exit(1);
+  }
 };
 
 export default class JsonRpc {
@@ -105,6 +108,7 @@ export default class JsonRpc {
     try {
       const txnReceipts =
       await this.getTransactionReceiptAsync(txn.hash).timeout(promiseTimeoutInMilliseconds);
+      if (!txnReceipts) throw new Error(`Transactions receipt returned null for txn ${JSON.stringify(txn)}`);
       const logs = txnReceipts.logs ? txnReceipts.logs.filter(log => isInArray(this.addresses,
         log.address)) : [];
 
@@ -182,15 +186,20 @@ export default class JsonRpc {
    * @param {*} block
    */
   async scanFastMode(block) {
-    const logsAsArray = await this.getLogsFromOneBlock();
-    const logs = logsAsArray.reduce((a, b) => [...a, ...b], []);
-    const blockTransactionsWithLogsList =
+    try {
+      const logsAsArray = await this.getLogsFromOneBlock();
+      if (!logsAsArray) throw new Error(`Could not get logs from block:${this.currentBlock} address:${JSON.stringify(this.addresses)}`);
+      const logs = logsAsArray.reduce((a, b) => [...a, ...b], []);
+      const blockTransactionsWithLogsList =
     this.getBlockAndTransactionLogsFormat(block, logs);
 
-    if (this.callback) {
-      blockTransactionsWithLogsList.forEach((transaction) => {
-        this.callback(transaction, this.addresses);
-      });
+      if (this.callback) {
+        blockTransactionsWithLogsList.forEach((transaction) => {
+          this.callback(transaction, this.addresses);
+        });
+      }
+    } catch (e) {
+      rpcErrorCatch(e);
     }
   }
 
