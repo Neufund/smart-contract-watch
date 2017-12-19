@@ -134,7 +134,7 @@ export default (watchPath) => {
     accessToken: program.accessToken,
     logglyAccessToken: program.logglyToken,
     logglySubDomain: program.logglySubdomain,
-    logglyTag: program.logglyTag
+    logglyTag: program.logglyTag,
   };
 };
 

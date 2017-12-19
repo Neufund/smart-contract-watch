@@ -66,7 +66,7 @@ const main = async () => {
     lastBlockNumberFilePath, logLevel,
     logglyAccessToken,
     logglySubDomain,
-    logglyTag
+    logglyTag,
   } = command();
 
   setLoggerLevel(logLevel);
