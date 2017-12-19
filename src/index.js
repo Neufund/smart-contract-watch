@@ -1,4 +1,4 @@
-import logger, { logError, setLoggerLevel } from './logger';
+import logger, { logError, setLoggerLevel, setLogglyTransport } from './logger';
 import command, { getCommandVars } from './command';
 import Decoder from './decoder';
 import { isAddress } from './web3/utils';
@@ -66,8 +66,15 @@ const transactionHandler = async (transaction, addresses) => {
  */
 const main = async () => {
   const { from, to, addresses, quickMode,
-    lastBlockNumberFilePath, logLevel } = command();
+    lastBlockNumberFilePath, logLevel,
+    logglyAccessToken,
+    logglySubDomain,
+    logglyTag,
+  } = command();
+
   setLoggerLevel(logLevel);
+  setLogglyTransport(logglyAccessToken, logglySubDomain, logglyTag);
+
   logger.debug('Start process');
   addresses.forEach((address) => { if (!isAddress(address)) throw new Error(`Address ${address} is not a valid ethereum address`); });
   const PromisifiedAbiObjects = addresses.map(async address => (

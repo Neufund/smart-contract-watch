@@ -45,6 +45,10 @@ ex, `-s ./example-file-path` or `--save-state ./example-file-path`.
 
 `-e or --access-token` Etherscan access token, used to access etherscan for ABI importing. 
 
+`--loggly-token`      Loggly access token
+`--loggly-subdomain`  Loggly subdomain
+`--loggly-tag`        Loggly tag
+
 ### ENV Variables 
 Environmental variables come second in priority, you can specify every parameter indicated as an ENV variable. Additionally you can mix between different settings if convenient for your application.In your `.env` you can specify parameters as
 
@@ -65,6 +69,13 @@ Environmental variables come second in priority, you can specify every parameter
 `OUTPUT_TYPE`
 
 `ACCESS_TOKEN`
+
+`LOGGLY_ACCESS_TOKEN`
+
+`LOGGLY_SUB_DOMAIN`
+
+`LOGGLY_TAG`
+
 
 The inputs are very similar to when using CLI only `QUICK_MODE` is different in the sense that it can use true/false values
 

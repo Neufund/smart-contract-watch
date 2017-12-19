@@ -40,7 +40,8 @@
     "request": "^2.82.0",
     "request-promise": "^4.2.1",
     "web3": "0.19.0",
-    "winston": "2.3.1",
-    "yamljs": "^0.3.0"
+    "winston": "^2.4.0",
+    "yamljs": "^0.3.0",
+    "winston-loggly-bulk": "^2.0.1"
   }
 }
