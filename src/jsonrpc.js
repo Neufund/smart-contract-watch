@@ -38,6 +38,7 @@ export default class JsonRpc {
     this.getLogs = initCustomRPCs(this.web3Instance).getLogs;
     this.getLastBlockAsync = bluebird.promisify(this.web3Instance.eth.getBlockNumber);
     this.callback = callback;
+    this.blockConfirmationOffset = 20;
     if (!callback) {
       logger.info('Warning!: No callback function defined');
     }
@@ -45,7 +46,7 @@ export default class JsonRpc {
   }
   /**
    * This will return the final data structure
-   * for the transaction response
+   * for the transaction response from node
    * @param string tx
    * @param Object receipt
    * @param Array logs
@@ -193,12 +194,20 @@ export default class JsonRpc {
       });
     }
   }
-
   /**
-   * The main function that run scan all the blocks.
+   * Returns last block after a backward offset for block confirmation 
+   * 
+   * @returns {number} Latest block after offsetting backwards
+   */
+  async getLastBlockWithOffset() {
+    const lastBlockNumber = await this.getLastBlockAsync().timeout(promiseTimeoutInMilliseconds);
+    return lastBlockNumber - this.blockConfirmationOffset;
+  }
+  /**
+   * this scans all the blocks.
    */
   async scanBlocks(isFastMode = false) {
-    let lastBlockNumber = await this.getLastBlockAsync().timeout(promiseTimeoutInMilliseconds);
+    let lastBlockNumber = await this.getLastBlockWithOffset();
     validateBlockByNumber(this.currentBlock, lastBlockNumber);
     if (this.toBlock) {
       validateBlockByNumber(this.toBlock, lastBlockNumber);
@@ -208,7 +217,7 @@ export default class JsonRpc {
         if (this.currentBlock > lastBlockNumber) {
           logger.debug(`Waiting ${waitingTimeInMilliseconds / 1000} seconds until the incoming blocks`);
           await bluebird.delay(waitingTimeInMilliseconds);
-          lastBlockNumber = await this.getLastBlockAsync().timeout(promiseTimeoutInMilliseconds);
+          lastBlockNumber = await this.getLastBlockWithOffset();
         } else {
           const block =
             await this.getBlockAsync(this.currentBlock, true).timeout(promiseTimeoutInMilliseconds);
