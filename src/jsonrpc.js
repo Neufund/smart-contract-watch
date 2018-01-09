@@ -1,6 +1,6 @@
 import fs from 'fs';
 import bluebird from 'bluebird';
-import { defaultBlockNumber, defaultFromBlockNumber, waitingTimeInMilliseconds, promiseTimeoutInMilliseconds } from './config';
+import { defaultBlockNumber, defaultFromBlockNumber, waitingTimeInMilliseconds, promiseTimeoutInMilliseconds, blockConfirmationOffset } from './config';
 import { getWeb3 } from './web3/web3Provider';
 import logger, { logError } from './logger';
 import { isInArray, isQueriedTransaction, isContractCreationQueriedTransaction, isRegularQueriedTransaction, validateBlockByNumber } from './utils';
@@ -39,7 +39,7 @@ export default class JsonRpc {
     this.getLogs = initCustomRPCs(this.web3Instance).getLogs;
     this.getLastBlockAsync = bluebird.promisify(this.web3Instance.eth.getBlockNumber);
     this.callback = callback;
-    this.blockConfirmationOffset = 20;
+    this.blockConfirmationOffset = blockConfirmationOffset;
     if (!callback) {
       logger.info('Warning!: No callback function defined');
     }
