@@ -3,7 +3,7 @@ import program from 'commander';
 import path from 'path';
 import YAML from 'yamljs';
 import { defaultBlockNumber, watchingConfigPath, getEnv, saveStateFileName } from './config';
-import { isPathExist, validateBlockByNumber, parseStrToNumStrict } from './utils';
+import { isPathExist, validateBlockByNumber, parseParamToNumStrict } from './utils';
 
 const rpcErrorMsg = '-n or --nodeAddress is required';
 const addressErrorMsg = '-a or --address is required';
@@ -123,6 +123,9 @@ export default (watchPath) => {
   const from = program.saveState ? handleSaveSate(program.saveState, program.from) : program.from;
   const saveState = program.saveState ?
     path.join(path.resolve(program.saveState), saveStateFileName) : null;
+  const blockConfirmations = !isNaN(parseParamToNumStrict(program.blockConfirmations)) ?
+    parseParamToNumStrict(program.blockConfirmations) : null;
+
   return {
     from: validateBlockByNumber(from, program.to),
     to: program.to,
@@ -131,7 +134,7 @@ export default (watchPath) => {
     lastBlockNumberFilePath: saveState,
     nodeUrl: validateParamter(program.nodeUrl, rpcErrorMsg),
     logLevel: validateParamBasedOnValue(program.logLevel, validLoggerValues, loggerErrorMsg),
-    blockConfirmations: validateParamBasedOnType(parseStrToNumStrict(program.blockConfirmations), 'number', blockConfirmationsErrorMsg),
+    blockConfirmations: validateParamBasedOnType(blockConfirmations, 'number', blockConfirmationsErrorMsg),
     outputType: program.outputType,
     accessToken: program.accessToken,
   };

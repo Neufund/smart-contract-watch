@@ -71,11 +71,11 @@ const main = async () => {
   logger.debug('Start process');
 
   addresses.forEach((address) => { if (!isAddress(address)) throw new Error(`Address ${address} is not a valid ethereum address`); });
-  const PromisifiedAbiObjects = addresses.map(async address => (
+  const promisifiedAbiObjects = addresses.map(async address => (
     { address, abi: await getABI(address) }
   ));
 
-  (await Promise.all(PromisifiedAbiObjects)).forEach((object) => {
+  (await Promise.all(promisifiedAbiObjects)).forEach((object) => {
     addressAbiMap[object.address.toLowerCase()] = new Decoder(object.abi);
   });
   const jsonRpc = new JsonRpc(addresses, from, to,

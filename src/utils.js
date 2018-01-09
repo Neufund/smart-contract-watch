@@ -71,7 +71,10 @@ export const isPathExist = path => fs.existsSync(path);
  * 
  * @param {string} source
  */
-export const parseStrToNumStrict = (source) => {
+export const parseParamToNumStrict = (source) => {
+  if (typeof source === 'number') {
+    return source;
+  }
   if (source === null) {
     return NaN;
   }

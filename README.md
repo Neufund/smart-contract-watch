@@ -13,9 +13,9 @@ Currently the smart-contract-watch runs in two modes:
 - **Quick mode**: in this mode the tool scans the blockchain and acquires all needed information to processes a whole block by only sending two RPC calls `eth_getBlockByHash`, `get_logs`. This proves to be more efficient and faster for quick direct transaction scanning.
 
 ### Block Confirmations
-In order for the smart contract watch to minimize the chance of recording transactions that might end up being discarded due to the chance where the queried node is on a side chain that the smart contract watch gives the option to set a number of block confirmations `-b`.
+Sometimes single codes are caught on side chains, uncles. these side chains have a minimal chance of carrying blocks with transactions that got discarded in the main ledger due to ethereum's consensus algorithm. In order to tackle this, a `confirmations block` option was added to specify the number of block confirmations before recording transactions in that block.
 
-If `-b` is set to `20` for example the smart contract watch will wait until the queried block hight is at least `20`.  
+For example, if `-b` is set to `20` the smart contract watch will wait until block hight is at least `20`.  
 
 ## Input
 The smart contract watch can take parameters either as a
@@ -50,7 +50,7 @@ ex, `-s ./example-file-path` or `--save-state ./example-file-path`.
 
 `-e or --access-token` Etherscan access token, used to access etherscan for ABI importing. 
 
-`-b or --block-confirmation` The number of block confirmations needed before a block is checked.
+`-b or --block-confirmations` The number of block confirmations needed before a block is checked.
 
 ### ENV Variables 
 Environmental variables come second in priority, you can specify every parameter indicated as an ENV variable. Additionally you can mix between different settings if convenient for your application.In your `.env` you can specify parameters as
@@ -71,7 +71,7 @@ Environmental variables come second in priority, you can specify every parameter
 
 `OUTPUT_TYPE`
 
-`BLOCK_CONFIRMATION`
+`BLOCK_CONFIRMATIONS`
 
 `ACCESS_TOKEN`
 
@@ -98,7 +98,7 @@ Smart Contract watch supports configuration files. You must insert all your conf
 
 `-accessToken`
 
-`-blockConfirmation`
+`-blockConfirmations`
 
 ## Smart Contract ABI
 In order for the tool to successfully decode transactions. ABIs for the smart contracts must be provided this is done automatically by sending requests via [Etherscan's Contracts api](https://etherscan.io/apis#contracts). 
