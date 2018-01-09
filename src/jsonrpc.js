@@ -17,11 +17,12 @@ export const rpcErrorCatch = async (e) => {
 
 export default class JsonRpc {
   /**
-   * Initialize class local variables
-   * @param Array addresses
-   * @param int currentBlock
-   * @param int toBlock
-   * @param function callback
+   * @constructor
+   * 
+   * @param {array} addresses queried addresses
+   * @param {number} currentBlock starting/current block
+   * @param {number} toBlock end block
+   * @param {function} callback callback function
    */
   constructor(addresses, fromBlock, toBlock, lastBlockNumberFilePath = null, callback = null) {
     this.addresses = addresses.map((address) => {
@@ -47,10 +48,11 @@ export default class JsonRpc {
   /**
    * This will return the final data structure
    * for the transaction response from node
-   * @param string tx
-   * @param Object receipt
-   * @param Array logs
-   * @return object
+   * 
+   * @param {string} tx transaction hash
+   * @param {Object} receipt transaction receipt
+   * @param {Array} logs transaction logs
+   * @return {object} 
    */
   static getTransactionFormat(transaction, receipt, logs) {
     const receiptResult = receipt;
@@ -60,8 +62,8 @@ export default class JsonRpc {
   }
 
   /**
-   * This will return the final data structure
-   * for the transaction response
+   * Formats Block and Logs into JSON file for output
+   * 
    * @param string tx
    * @param Object receipt
    * @param Array logs
@@ -98,9 +100,11 @@ export default class JsonRpc {
 
 
   /**
-   * Async function that gets the transaction and transaction receipt
-   * then get the logs out of the receipt transaction then execute the callback function
-   * @param string txn
+   * scan transaction_receipt for queried addresses 
+   * and return a formatted object for output   
+   * 
+   * @param {string} txn transaction hash
+   * @returns {Object} formatted string
    */
   async scanTransaction(txn) {
     try {
@@ -124,10 +128,11 @@ export default class JsonRpc {
   }
 
   /**
-   * This function handles the transactions that exist in one block
-   *  and puts them into an array of promises, then executes them and finally
-   * send them to the output module;
-   * @param Object block
+   * Scans blockchain by iterating over all transactions and receipts once 
+   * done it calls callback.
+   * @see https://github.com/Neufund/smart-contract-watch#modes
+   * 
+   * @param {object} block
    */
   async scanSlowMode(block) {
     if (block && block.transactions && Array.isArray(block.transactions)) {
@@ -141,13 +146,13 @@ export default class JsonRpc {
           await rpcErrorCatch(e);
         }
       }
-      logger.debug(`Number of transactions are ${transactionsResult.length}`);
+      logger.debug(`Number of transactions: ${transactionsResult.length}`);
 
       if (this.callback) {
         transactionsResult.forEach((txn) => {
           if (txn) {
             const queriedTxn = txn;
-            // old blocks have networkId null
+            // returned queries from older blocks have no networkId
             if (!queriedTxn.networkId) {
               queriedTxn.networkId = this.web3Instance.version.network;
             }
@@ -164,7 +169,10 @@ export default class JsonRpc {
 
 
   /**
-   * The main function that runs scan all the blocks without the transaction - fastmode -
+   * gets all queried logs from the specified 
+   * one block at a time
+   * 
+   * @returns {object} queried logs 
    */
   async getLogsFromOneBlock() {
     const blockNumber = this.web3Instance.toHex(this.currentBlock);
@@ -179,8 +187,8 @@ export default class JsonRpc {
   }
 
   /**
-   * This function getting the logs out per block
-   * @param {*} block
+   * Preform block scanning using fast mode
+   * @param {object} block
    */
   async scanFastMode(block) {
     const logsAsArray = await this.getLogsFromOneBlock();
@@ -195,7 +203,7 @@ export default class JsonRpc {
     }
   }
   /**
-   * Returns last block after a backward offset for block confirmation 
+   * Returns latest with a block confirmation offset
    * 
    * @returns {number} Latest block after offsetting backwards
    */
@@ -204,7 +212,10 @@ export default class JsonRpc {
     return lastBlockNumber - this.blockConfirmationOffset;
   }
   /**
-   * this scans all the blocks.
+   *  scan all specified blocks.
+   * 
+   * @param {bool} isFastMode should scanning be in fast mode or slow mode 
+   * @see https://github.com/Neufund/smart-contract-watch#modes
    */
   async scanBlocks(isFastMode = false) {
     let lastBlockNumber = await this.getLastBlockWithOffset();
