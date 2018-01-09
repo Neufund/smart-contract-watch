@@ -61,6 +61,32 @@ export const validateBlockByNumber = (fromBlock, toBlock) => {
 
 /**
  * check if path is exists or not
+ * 
  * @param string path
  */
 export const isPathExist = path => fs.existsSync(path);
+
+/**
+ * strictly parse string to integer
+ * 
+ * @param {string} source
+ */
+export const parseStrToNumStrict = (source) => {
+  if (source === null) {
+    return NaN;
+  }
+  if (source === undefined) {
+    return NaN;
+  }
+  let transform = source.replace(/\s/g, '');
+  transform = transform.replace(/,/g, '.');
+  // only allow digits dots and minus
+  if (/[^.\-\d]/.test(transform)) {
+    return NaN;
+  }
+  // only allow one dot
+  if ((transform.match(/\./g) || []).length > 1) {
+    return NaN;
+  }
+  return parseInt(transform, 10);
+};
