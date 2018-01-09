@@ -1,16 +1,21 @@
 # smart-contract-watch
 [![Build Status](https://travis-ci.org/Neufund/smart-contract-watch.svg?branch=master)](https://travis-ci.org/Neufund/smart-contract-watch) [![codecov](https://codecov.io/gh/Neufund/smart-contract-watch/branch/master/graph/badge.svg)](https://codecov.io/gh/Neufund/smart-contract-watch)
 
-A smart contract monitoring tool.It can monitor smart contract activity and interactions based on transactions and events. It can be used a local blockchain explorer that runs locally in your server or machine or an investigation tool that scrapes the blockchain in search for a investigation. This is done by scanning transactions in the blockchain via JSON RPC calls to a working Ethereum Node.
+A smart contract monitoring tool. It can monitor smart contracts activity and interactions based on generated transactions and events.For example, It can be used a local blockchain explorer that runs locally on your server or machine ,or as an investigation tool that scrapes the blockchain in search for a specific query. This is done by sending requests to an Ethereum node via [JSON RPC](https://github.com/ethereum/wiki/wiki/JSON-RPC) calls.
 
-NOTE: You need to connect to a working Ethereum node in order for this tool to run.
+NOTE: You need to connect to an already functional Ethereum node in order for this tool to run.
 ## Modes
 
 Currently the smart-contract-watch runs in two modes:
 
-- **Default mode**: the tool scans the blockchain block by block, transaction by transaction and log by log for any activity related to the specified smart contracts. This is a slow processes and heavy on the node due to the high number of `eth_getTransactionByHash` and `eth_getTransactionReceipt` RPC requests. However, this approach gives the opportunity to add more features in the future like instrumenting the EVM or debugging transactions.
+- **Default mode**: in this mode the tool scans the blockchain block by block, transaction by transaction and log by log for any activity related to the specified smart contracts. This is a slow processes and heavy on the node due to the high number of `eth_getTransactionByHash` and `eth_getTransactionReceipt` RPC requests. However, this approach gives the opportunity to add more features in the future like instrumenting the EVM or debugging transactions.
 
-- **Quick mode**: the tool scans the blockchain and acquires all needed information for a whole block by only sending two RPC calls `eth_getBlockByHash`, `get_logs`. This proves to be more efficient and faster for direct transaction scanning.
+- **Quick mode**: in this mode the tool scans the blockchain and acquires all needed information to processes a whole block by only sending two RPC calls `eth_getBlockByHash`, `get_logs`. This proves to be more efficient and faster for quick direct transaction scanning.
+
+### Block Confirmations
+In order for the smart contract watch to minimize the chance of recording transactions that might end up being discarded due to the chance where the queried node is on a side chain that the smart contract watch gives the option to set a number of block confirmations `-b`.
+
+If `-b` is set to `20` for example the smart contract watch will wait until the queried block hight is at least `20`.  
 
 ## Input
 The smart contract watch can take parameters either as a
@@ -45,6 +50,8 @@ ex, `-s ./example-file-path` or `--save-state ./example-file-path`.
 
 `-e or --access-token` Etherscan access token, used to access etherscan for ABI importing. 
 
+`-b or --block-confirmation` The number of block confirmations needed before a block is checked.
+
 ### ENV Variables 
 Environmental variables come second in priority, you can specify every parameter indicated as an ENV variable. Additionally you can mix between different settings if convenient for your application.In your `.env` you can specify parameters as
 
@@ -63,6 +70,8 @@ Environmental variables come second in priority, you can specify every parameter
 `LOG_LEVEL`
 
 `OUTPUT_TYPE`
+
+`BLOCK_CONFIRMATION`
 
 `ACCESS_TOKEN`
 
@@ -88,6 +97,8 @@ Smart Contract watch supports configuration files. You must insert all your conf
 `-outputType`
 
 `-accessToken`
+
+`-blockConfirmation`
 
 ## Smart Contract ABI
 In order for the tool to successfully decode transactions. ABIs for the smart contracts must be provided this is done automatically by sending requests via [Etherscan's Contracts api](https://etherscan.io/apis#contracts). 
