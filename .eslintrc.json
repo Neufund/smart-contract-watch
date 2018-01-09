@@ -16,6 +16,7 @@
    "jsx-a11y/href-no-hash": "off",
    "no-underscore-dangle": "off",
    "no-await-in-loop": "off",
-   "import/prefer-default-export": "off"
+   "import/prefer-default-export": "off",
+   "valid-typeof": "off"
   }
 }
