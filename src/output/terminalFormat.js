@@ -1,12 +1,12 @@
-import { getCommandVars } from '../command.js';
-
 // Dep modules
-const chalk = require('chalk');
-const ansiStyle = require('ansi-styles');
+import chalk from 'chalk';
+import ansiStyle from 'ansi-styles';
+
+import { getCommandVars } from '../command.js';
 
 export default (data) => {
   function styleFactory(color) {
-    return function (str) {
+    return str => {
       const colors = getCommandVars('colors');
       switch (colors) {
         case '1': // ANSI colors
@@ -24,7 +24,7 @@ export default (data) => {
     green: styleFactory('green'),
     red: styleFactory('red'),
     yellow: styleFactory('yellow'),
-    // blue: styleFactory('blue'),
+    blue: styleFactory('blue'),
     cyan: styleFactory('cyan'),
     white: styleFactory('white'),
     gray: styleFactory('gray'),
