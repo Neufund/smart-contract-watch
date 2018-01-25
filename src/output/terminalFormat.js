@@ -1,4 +1,3 @@
-// Dep modules
 import chalk from 'chalk';
 import ansiStyle from 'ansi-styles';
 
@@ -6,7 +5,7 @@ import { getCommandVars } from '../command.js';
 
 export default (data) => {
   function styleFactory(color) {
-    return str => {
+    return (str) => {
       const colors = getCommandVars('colors');
       switch (colors) {
         case '1': // ANSI colors
@@ -34,8 +33,9 @@ export default (data) => {
   const txHash = style.cyan(data.transaction.hash);
   let functionName = '';
   let functionParams = '';
-  let eventText = '';
+  let logEvents = [];
   let extraMessage = '';
+
   const utils = {
     // Windows returns 'win32' even on 64 bit but we still check for win64,
     // just in case...
@@ -61,7 +61,6 @@ export default (data) => {
     }
   };
 
-
   if (data.decodedInputDataResult) {
     functionName = style.green(data.decodedInputDataResult.name);
     if (data.decodedInputDataResult.params) {
@@ -76,9 +75,8 @@ export default (data) => {
   }
 
   if (data.decodedLogs) {
-    data.decodedLogs.forEach((log) => {
-      const name = style.yellow(log.name);
-      eventText = `${name}(`;
+    logEvents = data.decodedLogs.map((log) => {
+      let eventText = `${log.name}(`;
       log.events.forEach((i, idx, events) => {
         const value = style.cyan(events[idx].value);
         eventText += `${events[idx].name}=${value}`;
@@ -87,6 +85,7 @@ export default (data) => {
         }
       });
       eventText += ')';
+      return eventText;
     });
   }
   if (data.transaction.status === 1 || data.transaction.status === 0) {
@@ -95,6 +94,5 @@ export default (data) => {
     extraMessage = 'Suspected fail';
   }
 
-  const tshash = style.red('tshash');
-  return `${tshash}:${txHash} ${functionName}(${functionParams}) ${eventText} ${extraMessage}`;
+  return `tshash:${txHash} ${functionName}(${functionParams}) ${logEvents} ${extraMessage}`;
 };

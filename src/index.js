@@ -24,14 +24,13 @@ import { isContractCreationTransaction } from './utils';
 
 const addressAbiMap = {};
 
-const transactionHandler = async (transaction) => {
-  let decodedLogs;
+const transactionHandler = async (transaction, addresses) => {
+  let decodedLogs = [];
   let decodedInputDataResult;
   if (isContractCreationTransaction(transaction.to)) {
     try {
       decodedInputDataResult = addressAbiMap[transaction.contractAddress || transaction.creates]
         .decodeConstructor(transaction.input);
-      decodedLogs = null;
     } catch (error) {
       logError(error,
         `txHash: ${transaction.hash} ${error.message}`);
@@ -45,9 +44,13 @@ const transactionHandler = async (transaction) => {
         `txHash: ${transaction.hash} ${error.message}`);
       return;
     }
-
     try {
-      decodedLogs = addressAbiMap[transaction.to].decodeLogs(transaction.logs);
+      decodedLogs = transaction.logs.map((log) => {
+        if (addresses.some(address => address === log.address)) {
+          return addressAbiMap[log.address].decodeSingleLog(log);
+        }
+        return { name: 'UNDECODED', events: [{ name: 'rawLogs', value: JSON.stringify(log), type: 'logs' }] };
+      });
     } catch (error) {
       logError(error,
         `txHash: ${transaction.hash} ${error.message}`);
@@ -63,19 +66,20 @@ const transactionHandler = async (transaction) => {
  */
 const main = async () => {
   const { from, to, addresses, quickMode,
-    lastBlockNumberFilePath, logLevel } = command();
+    lastBlockNumberFilePath, logLevel, blockConfirmations } = command();
   setLoggerLevel(logLevel);
   logger.debug('Start process');
+
   addresses.forEach((address) => { if (!isAddress(address)) throw new Error(`Address ${address} is not a valid ethereum address`); });
-  const PromisifiedAbiObjects = addresses.map(async address => (
+  const promisifiedAbiObjects = addresses.map(async address => (
     { address, abi: await getABI(address) }
   ));
 
-  (await Promise.all(PromisifiedAbiObjects)).forEach((object) => {
+  (await Promise.all(promisifiedAbiObjects)).forEach((object) => {
     addressAbiMap[object.address.toLowerCase()] = new Decoder(object.abi);
   });
-
-  const jsonRpc = new JsonRpc(addresses, from, to, lastBlockNumberFilePath, transactionHandler);
+  const jsonRpc = new JsonRpc(addresses, from, to,
+    blockConfirmations, lastBlockNumberFilePath, transactionHandler);
 
   await jsonRpc.scanBlocks(quickMode);
   logger.info('Finish scanning all the blocks');
