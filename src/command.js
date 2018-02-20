@@ -19,6 +19,7 @@ const defaultSaveState = null;
 const defaultOutputType = 'terminal';
 const defaultAccessToken = '';
 const defaultBlockConfirmations = '0';
+const defaultColors = null; // null No color 1 Ansi, 2 Chalk
 
 const validLoggerValues = ['info', 'error', 'debug'];
 
@@ -117,6 +118,7 @@ export default (watchPath) => {
       .option('-o,--output-type [n]', 'Output type', handelInputValues('OUTPUT_TYPE', watchConfig.outputType, defaultOutputType))
       .option('-e,--access-token [n]', 'etherscan access token', handelInputValues('ACCESS_TOKEN', watchConfig.accessToken, defaultAccessToken))
       .option('-b,--block-confirmations [n]', 'Number of block confirmations before a block is processed', handelInputValues('BLOCK_CONFIRMATIONS', watchConfig.blockConfirmations, defaultBlockConfirmations))
+      .option('-c,--colors [n]', 'use 1 for ansi color, 2 for chalk', handelInputValues('COLORS', watchConfig.colors, defaultColors))
       .parse(process.argv);
   }
   if (typeof program === 'undefined') { throw new Error(noArgsErrorMsg); }
@@ -131,6 +133,7 @@ export default (watchPath) => {
     to: program.to,
     addresses: validateParamter(program.addresses, addressErrorMsg),
     quickMode: validateBool(program.quick, quickModeErrorMsg),
+    colors: validateParamter(program.colors),
     lastBlockNumberFilePath: saveState,
     nodeUrl: validateParamter(program.nodeUrl, rpcErrorMsg),
     logLevel: validateParamBasedOnValue(program.logLevel, validLoggerValues, loggerErrorMsg),
